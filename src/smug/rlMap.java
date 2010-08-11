@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package smug;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -18,6 +19,8 @@ public class rlMap
   final private int MAX_ROOM_SIZE = 9;
   final private int MIN_DOORS = 1;
   final private int MAX_DOORS = 2;
+  final private int MIN_FREE_DOORS = 1;
+  final private int MAX_FREE_DOORS = 3;
 
   private ArrayList<ArrayList<rlObj>> map;
   private int cols;
@@ -67,7 +70,11 @@ public class rlMap
       int rs = MIN_ROOMS + gen.nextInt(MAX_ROOMS - MIN_ROOMS + 1);
       for (int i = 0; i < rs; i++)
         generateRoom();
+      rs = MIN_FREE_DOORS + gen.nextInt(MAX_FREE_DOORS - MIN_FREE_DOORS + 1);
+      for (int i = 0; i < rs; i++)
+        generateFreeDoor();
       done = generateTunnels();
+//      done = true;
     }
   }
 
@@ -123,7 +130,7 @@ public class rlMap
           }
         int ds = MIN_DOORS + gen.nextInt(MAX_DOORS - MIN_DOORS + 1);
         for (int i = 0; i < ds; i++)
-          generateDoor(i, x, y, w, h);
+          generateDoor(x, y, w, h);
       }
     }
   }
@@ -158,7 +165,41 @@ public class rlMap
     return res;
   }
 
-  private void generateDoor(int idx, int rx, int ry, int rw, int rh)
+  private void checkTunnel(rlWall w, int wx, int wy, rlDoor.Dir d)
+  {
+    rlObj ol, or, ob, of;
+    boolean dig = true;
+    if ((d == rlDoor.Dir.N) || (d == rlDoor.Dir.S))
+    {
+      ol = map.get(wy).get(wx - 1);
+      or = map.get(wy).get(wx + 1);
+      ob = map.get(wy - 1).get(wx);
+      of = map.get(wy + 1).get(wx);
+    }
+    else
+    {
+      ol = map.get(wy - 1).get(wx);
+      or = map.get(wy + 1).get(wx);
+      ob = map.get(wy).get(wx - 1);
+      of = map.get(wy).get(wx + 1);
+    }
+    if (ol instanceof rlFloor)
+      dig = false;
+    if (or instanceof rlFloor)
+      dig = false;
+    if (ol instanceof rlDoor)
+      dig = true;
+    if (or instanceof rlDoor)
+      dig = true;
+    if (ob instanceof rlDoor)
+      dig = true;
+    if (of instanceof rlDoor)
+      dig = true;
+    if (!dig)
+      w.kind = rlWall.Kind.CORN;
+  }
+
+  private void generateDoor(int rx, int ry, int rw, int rh)
   {
     Random gen = new Random();
     boolean done = false;
@@ -176,16 +217,16 @@ public class rlMap
           rlDoor d = null;
           if (y == ry)
             if (checkDoor(map.get(y - 1).get(x)))
-              d = new rlDoor(idx, rlDoor.Dir.N, x, y);
+              d = new rlDoor(rlDoor.Dir.N, rlDoor.Kind.ROOM, x, y);
           if (y == rh)
             if (checkDoor(map.get(y + 1).get(x)))
-              d = new rlDoor(idx, rlDoor.Dir.S, x, y);
+              d = new rlDoor(rlDoor.Dir.S, rlDoor.Kind.ROOM, x, y);
           if (x == rx)
             if (checkDoor(map.get(y).get(x - 1)))
-              d = new rlDoor(idx, rlDoor.Dir.W, x, y);
+              d = new rlDoor(rlDoor.Dir.W, rlDoor.Kind.ROOM, x, y);
           if (x == rw)
             if (checkDoor(map.get(y).get(x + 1)))
-              d = new rlDoor(idx, rlDoor.Dir.E, x, y);
+              d = new rlDoor(rlDoor.Dir.E, rlDoor.Kind.ROOM, x, y);
           if (d != null)
           {
             map.get(y).set(x, d);
@@ -224,6 +265,16 @@ public class rlMap
 
   private boolean generateTunnels()
   {
+    Random gen = new Random();
+    ArrayList<rlDoor> rd = new ArrayList<rlDoor>();
+    rlDoor md;
+    while (!doors.isEmpty())
+    {
+      md = doors.get(gen.nextInt(doors.size()));
+      doors.remove(md);
+      rd.add(md);
+    }
+    doors.addAll(rd);
     rlObj from;
     boolean done = false;
     boolean res = true;
@@ -249,9 +300,10 @@ public class rlMap
         if (!res)
           done = true;
       }
-      if (step > 20)
+      if (step > 100)
       {
         System.out.println("Loop break");
+        res = false;
         done = true;
       }
     }
@@ -260,6 +312,7 @@ public class rlMap
 
   private rlObj findTarget(int x, int y)
   {
+    Random gen = new Random();
     rlObj to, tmp;
     int diff, ndiff;
     to = graf.get(0);
@@ -271,8 +324,14 @@ public class rlMap
         if (((rlFloor) tmp).kind == rlFloor.Kind.ROOM)
           continue;
       ndiff = (Math.abs(x - tmp.x) + Math.abs(y - tmp.y));
+      if (ndiff == diff)
+        if (gen.nextBoolean())
+          to = tmp;
       if (ndiff < diff)
+      {
         to = tmp;
+        diff = ndiff;
+      }
     }
     return to;
   }
@@ -287,11 +346,38 @@ public class rlMap
     int step = 0, pass = 0;
     rlDoor.Dir d = rlDoor.Dir.N;
     if (from instanceof rlDoor)
-      d = ((rlDoor)from).dir;
+    {
+      rlDoor tmp = (rlDoor)from;
+      d = tmp.dir;
+      if (tmp.kind == rlDoor.Kind.TUNN)
+      {
+        rlObj sb = null;
+        if (d == rlDoor.Dir.N)
+          sb = map.get(tmp.y + 1).get(tmp.x);
+        else if (d == rlDoor.Dir.E)
+          sb = map.get(tmp.y).get(tmp.x - 1);
+        else if (d == rlDoor.Dir.S)
+          sb = map.get(tmp.y - 1).get(tmp.x);
+        else if (d == rlDoor.Dir.W)
+          sb = map.get(tmp.y).get(tmp.x + 1);
+        if (sb instanceof rlWall)
+          if (((rlWall)sb).kind == rlWall.Kind.ROCK)
+          {
+            if (d == rlDoor.Dir.N)
+              d = rlDoor.Dir.S;
+            else if (d == rlDoor.Dir.S)
+              d = rlDoor.Dir.N;
+            else if (d == rlDoor.Dir.W)
+              d = rlDoor.Dir.E;
+            else if (d == rlDoor.Dir.E)
+              d = rlDoor.Dir.W;
+          }
+      }
+    }
     rlDoor.Dir nd = d;
     rlObj to, o;
-    int nx, ny, dh, dw;
-    boolean turn = false;
+    int nx = 0, ny = 0, dh, dw, tc = 0;
+    boolean turn = false, swd = false;
     System.out.println("Digging tunnel...");
 //    to = findTarget(x, y);
     while (!done)
@@ -301,12 +387,6 @@ public class rlMap
         System.out.println("...pass: " + Integer.toString(pass));
       if ((step % 10) == 0)
         System.out.println("...step: " + Integer.toString(step));
-      if (step > 1000)
-      {
-        done = true;
-        res = false;
-        continue;
-      }
       to = findTarget(x, y);
       if (step > 0)
       {
@@ -314,7 +394,21 @@ public class rlMap
         {
           dh = Math.abs(to.x - x);
           dw = Math.abs(to.y - y);
-          if (dw < dh)
+          if (dw == 0)
+          {
+            if (to.x > x)
+              nd = rlDoor.Dir.E;
+            else
+              nd = rlDoor.Dir.W;
+          }
+          else if (dh == 0)
+          {
+            if (to.y > y)
+              nd = rlDoor.Dir.S;
+            else
+              nd = rlDoor.Dir.N;
+          }
+          else if ((dw < dh) && (!swd))
           {
             if (to.y > y)
               nd = rlDoor.Dir.S;
@@ -424,13 +518,50 @@ public class rlMap
         rlWall tmp = (rlWall)o;
         if (tmp.kind == rlWall.Kind.ROCK)
         {
-          map.get(ny).set(nx, new rlFloor(rlFloor.Kind.TUNN, nx, ny));
-          x = nx;
-          y = ny;
-          step++;
+          checkTunnel(tmp, nx, ny, d);
+          if (tmp.kind == rlWall.Kind.ROCK)
+          {
+            map.get(ny).set(nx, new rlFloor(rlFloor.Kind.TUNN, nx, ny));
+            x = nx;
+            y = ny;
+            step++;
+          }
+          else
+            turn = true;
         }
         else
           turn = true;
+      }
+      if (turn)
+      {
+        tc++;
+        if (tc > 2)
+        {
+          swd = !swd;
+          tc = 0;
+        }
+      }
+      else
+        turn = false;
+      if (!done)
+      {
+        o = map.get(y).get(x + 1);
+        if (graf.contains(o))
+          done = true;
+        o = map.get(y).get(x - 1);
+        if (graf.contains(o))
+          done = true;
+        o = map.get(y + 1).get(x);
+        if (graf.contains(o))
+          done = true;
+        o = map.get(y - 1).get(x);
+        if (graf.contains(o))
+          done = true;
+      }
+      if (step > 1000)
+      {
+        done = true;
+        res = false;
       }
       if ((step == 0) && (pass > 500))
       {
@@ -443,6 +574,13 @@ public class rlMap
       System.out.println("Tunnel digged, step: " + Integer.toString(step) + " pass: " + Integer.toString(pass));
     else
       System.out.println("Tunnel failed, step: " + Integer.toString(step) + " pass: " + Integer.toString(pass));
+/*    for (int dy = 0; dy < rows; dy++)
+      for (int dx = 0; dx < cols; dx++)
+        map.get(dy).get(dx).getSymbol().bgColor = rlColor.BLACK;
+    map.get(ny).get(nx).getSymbol().bgColor = rlColor.LBLUE;
+    map.get(y).get(x).getSymbol().bgColor = rlColor.BLUE;
+    map.get(from.y).get(from.x).getSymbol().bgColor = rlColor.YELLOW;
+    map.get(to.y).get(to.x).getSymbol().bgColor = rlColor.LGREEN; */
     return res;
   }
 
@@ -453,7 +591,12 @@ public class rlMap
     rlObj o;
     ArrayList<rlObj> toGraf = new ArrayList<rlObj>();
     if (graf.isEmpty())
-      graf.add(doors.get(0));
+      for (int i = 0; i < doors.size(); i++)
+        if (doors.get(i).kind == rlDoor.Kind.ROOM)
+        {
+          graf.add(doors.get(i));
+          break;
+        }
     while (size != graf.size())
     {
       step++;
@@ -531,5 +674,51 @@ public class rlMap
       }
     }
     System.out.println("Graf built, step: " + Integer.toString(step));
+  }
+
+  private void generateFreeDoor()
+  {
+    System.out.println("Generating free door...");
+    Random gen = new Random();
+    boolean done = false;
+    while (!done)
+    {
+      int x = 2 + gen.nextInt(cols - 4);
+      int y = 2 + gen.nextInt(rows - 4);
+      done = true;
+      for (int cy = y - 1; cy < y + 2; cy++)
+        for (int cx = x - 1; cx < x + 2; cx++)
+        {
+          rlObj o = map.get(cy).get(cx);
+          if (o instanceof rlWall)
+            if (((rlWall)o).kind == rlWall.Kind.ROCK)
+              continue;
+          done = false;
+        }
+      if (done)
+      {
+        rlDoor.Dir nd = rlDoor.Dir.N;
+        int ds = gen.nextInt(4);
+        if (ds == 1)
+          nd = rlDoor.Dir.E;
+        if (ds == 2)
+          nd = rlDoor.Dir.S;
+        if (ds == 3)
+          nd = rlDoor.Dir.W;
+        rlDoor d = new rlDoor(nd, rlDoor.Kind.TUNN, x, y);
+        map.get(y).set(x, d);
+        doors.add(d);
+        if ((nd == rlDoor.Dir.N) || (nd == rlDoor.Dir.S))
+        {
+          ((rlWall)map.get(y).get(x + 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y).get(x - 1)).kind = rlWall.Kind.CORN;
+        }
+        else
+        {
+          ((rlWall)map.get(y + 1).get(x)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y - 1).get(x)).kind = rlWall.Kind.CORN;
+        }
+      }
+    }
   }
 }

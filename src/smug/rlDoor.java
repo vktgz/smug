@@ -16,13 +16,18 @@ public class rlDoor
     N, S, W, E
   }
 
-  public Dir dir;
-  public int room;
+  public enum Kind
+  {
+    ROOM, TUNN
+  }
 
-  public rlDoor(int ridx, Dir ndir, int nx, int ny)
+  public Dir dir;
+  public Kind kind;
+
+  public rlDoor(Dir ndir, Kind nkind, int nx, int ny)
   {
     super(Type.DOOR, new rlSymbol('+', rlColor.BROWN, rlColor.BLACK), nx, ny);
-    room = ridx;
     dir = ndir;
+    kind = nkind;
   }
 }
