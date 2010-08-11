@@ -563,7 +563,12 @@ public class rlMap
         done = true;
         res = false;
       }
-      if ((step == 0) && (pass > 500))
+      if (pass > 5000)
+      {
+        done = true;
+        res = false;
+      }
+      if ((step == 0) && (pass > 50))
       {
         done = true;
         res = false;
@@ -683,8 +688,8 @@ public class rlMap
     boolean done = false;
     while (!done)
     {
-      int x = 2 + gen.nextInt(cols - 4);
-      int y = 2 + gen.nextInt(rows - 4);
+      int x = 3 + gen.nextInt(cols - 6);
+      int y = 3 + gen.nextInt(rows - 6);
       done = true;
       for (int cy = y - 1; cy < y + 2; cy++)
         for (int cx = x - 1; cx < x + 2; cx++)
@@ -712,11 +717,19 @@ public class rlMap
         {
           ((rlWall)map.get(y).get(x + 1)).kind = rlWall.Kind.CORN;
           ((rlWall)map.get(y).get(x - 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y - 1).get(x + 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y - 1).get(x - 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y + 1).get(x + 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y + 1).get(x - 1)).kind = rlWall.Kind.CORN;
         }
         else
         {
           ((rlWall)map.get(y + 1).get(x)).kind = rlWall.Kind.CORN;
           ((rlWall)map.get(y - 1).get(x)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y + 1).get(x - 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y - 1).get(x - 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y + 1).get(x + 1)).kind = rlWall.Kind.CORN;
+          ((rlWall)map.get(y - 1).get(x + 1)).kind = rlWall.Kind.CORN;
         }
       }
     }
