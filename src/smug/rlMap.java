@@ -22,21 +22,23 @@ public class rlMap
   final private int MIN_FREE_DOORS = 1;
   final private int MAX_FREE_DOORS = 3;
 
-  private ArrayList<ArrayList<rlObj>> map;
+  public ArrayList<ArrayList<rlObj>> map;
   private int cols;
   private int rows;
   private ArrayList<rlDoor> doors;
   private ArrayList<rlObj> graf;
+  public ArrayList<rlObj> timer;
+  public rlDoor stUp, stDown;
 
   public rlMap(int ncols, int nrows)
   {
     cols = ncols;
     rows = nrows;
+    timer = new ArrayList<rlObj>();
     doors = new ArrayList<rlDoor>();
     graf = new ArrayList<rlObj>();
     map = new ArrayList<ArrayList<rlObj>>(rows);
     cleanMap();
-    generateMap();
   }
 
   private void cleanMap()
@@ -59,7 +61,7 @@ public class rlMap
     }
   }
 
-  private void generateMap()
+  public void generateMap()
   {
     Random gen = new Random();
     boolean done = false;
@@ -76,6 +78,7 @@ public class rlMap
       done = generateTunnels();
 //      done = true;
     }
+    generateStairs();
   }
 
   private void generateRoom()
@@ -197,6 +200,23 @@ public class rlMap
       dig = true;
     if (!dig)
       w.kind = rlWall.Kind.CORN;
+  }
+
+  private boolean checkStair(int sx, int sy)
+  {
+    boolean res = true;
+    rlObj o;
+    for (int y = sy - 1; y < sy + 2; y++)
+      for (int x = sx - 1; x < sx + 2; x++)
+      {
+        o = map.get(y).get(x);
+        res = res && (o instanceof rlFloor);
+        if (res)
+          res = res && (((rlFloor)o).kind == rlFloor.Kind.ROOM);
+        if (!res)
+          break;
+      }
+    return res;
   }
 
   private void generateDoor(int rx, int ry, int rw, int rh)
@@ -730,6 +750,63 @@ public class rlMap
           ((rlWall)map.get(y - 1).get(x - 1)).kind = rlWall.Kind.CORN;
           ((rlWall)map.get(y + 1).get(x + 1)).kind = rlWall.Kind.CORN;
           ((rlWall)map.get(y - 1).get(x + 1)).kind = rlWall.Kind.CORN;
+        }
+      }
+    }
+  }
+
+  private void generateStairs()
+  {
+    Random gen = new Random();
+    boolean done = false;
+    while (!done)
+    {
+      int x = 2 + gen.nextInt(cols - 4);
+      int y = 2 + gen.nextInt(rows - 4);
+      done = checkStair(x, y);
+      if (done)
+      {
+        stUp = new rlDoor(rlDoor.Dir.U, rlDoor.Kind.PASS, x, y);
+        map.get(y).set(x, stUp);
+      }
+    }
+    done = false;
+    while (!done)
+    {
+      int x = 2 + gen.nextInt(cols - 4);
+      int y = 2 + gen.nextInt(rows - 4);
+      done = checkStair(x, y);
+      if (done)
+      {
+        stDown = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, x, y);
+        map.get(y).set(x, stDown);
+      }
+    }
+  }
+
+  public void setVisible(int cx, int cy, int r)
+  {
+    rlPoint cc = new rlPoint(cx, cy);
+    rlCircle c = new rlCircle(cc, r);
+    rlLine ln;
+    rlPoint pt;
+    rlObj o;
+    for (int x = 0; x < cols; x++)
+      for (int y = 0; y < rows; y++)
+        map.get(y).get(x).setVisible(true, false);
+    for (int l = 0; l < c.lines(); l++)
+    {
+      ln = c.getLine(l);
+      for (int i = 0; i < ln.length(); i++)
+      {
+        pt = ln.get(i);
+        if ((pt.col >= 0) && (pt.col < cols) && (pt.row >=0) && (pt.row < rows))
+        {
+          o = map.get(pt.row).get(pt.col);
+          o.setVisible(false, true);
+          o.setVisible(true, true);
+          if (o instanceof rlWall)
+            break;
         }
       }
     }

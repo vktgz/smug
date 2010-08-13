@@ -13,12 +13,12 @@ public class rlDoor
 {
   public enum Dir
   {
-    N, S, W, E
+    N, S, W, E, U, D
   }
 
   public enum Kind
   {
-    ROOM, TUNN
+    ROOM, TUNN, PASS
   }
 
   public Dir dir;
@@ -29,5 +29,15 @@ public class rlDoor
     super(Type.DOOR, new rlSymbol('+', rlColor.BROWN, rlColor.BLACK), nx, ny);
     dir = ndir;
     kind = nkind;
+    if (dir == Dir.U)
+    {
+      smb.code = '<';
+      smb.fgColor = rlColor.GRAY;
+    }
+    if (dir == Dir.D)
+    {
+      smb.code = '>';
+      smb.fgColor = rlColor.GRAY;
+    }
   }
 }

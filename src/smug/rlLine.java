@@ -48,4 +48,29 @@ public class rlLine
       tmp = buf.get(idx);
     return tmp;
   }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    boolean res = (obj instanceof rlLine);
+    if (res)
+    {
+      rlLine tmp = (rlLine)obj;
+      res = (length() == tmp.length());
+      if (res)
+      {
+        for (int i = 0; i < length(); i++)
+          res = res && (get(i).equals(tmp.get(i)));
+      }
+    }
+    return res;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 47 * hash + (this.buf != null ? this.buf.hashCode() : 0);
+    return hash;
+  }
 }

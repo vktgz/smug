@@ -31,6 +31,12 @@ public class rlKeyboard
     return keys[key];
   }
 
+  public synchronized void rebound(int key)
+  {
+    if ((key >= 0) && (key < KEYS))
+      keys[key] = false;
+  }
+
   @Override
   public synchronized void keyPressed(KeyEvent e)
   {

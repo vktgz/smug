@@ -17,24 +17,36 @@ public class rlObj
   }
 
   public Type id;
-  private rlSymbol smb;
-  public ArrayList<rlSymbol> items;
-  public ArrayList<rlSymbol> chars;
-  public int x, y;
+  protected rlSymbol smb;
+  public ArrayList<rlObj> items;
+  public ArrayList<rlChar> chars;
+  public int x, y, time;
+  private boolean visible;
 
   public rlObj(Type nid, rlSymbol nsmb, int nx, int ny)
   {
     id = nid;
     smb = nsmb;
-    items = new ArrayList<rlSymbol>();
-    chars = new ArrayList<rlSymbol>();
+    items = new ArrayList<rlObj>();
+    chars = new ArrayList<rlChar>();
     x = nx;
     y = ny;
+    time = 0;
+    visible = false;
   }
 
   public rlSymbol getSymbol()
   {
-    return smb;
+    rlSymbol res = rlSymbol.FOG;
+    if (visible)
+    {
+      res = smb;
+      if (!items.isEmpty())
+        res = items.get(items.size() - 1).getSymbol();
+      if (!chars.isEmpty())
+        res = chars.get(chars.size() - 1).getSymbol();
+    }
+    return res;
   }
 
   @Override
@@ -58,5 +70,28 @@ public class rlObj
     hash = 97 * hash + this.x;
     hash = 97 * hash + this.y;
     return hash;
+  }
+
+  public void resetTime()
+  {
+    time = 0;
+  }
+
+  public boolean getVisible()
+  {
+    return visible;
+  }
+
+  public void setVisible(boolean content, boolean val)
+  {
+    if (content)
+    {
+      for (int i = 0; i < items.size(); i++)
+        items.get(i).setVisible(false, val);
+      for (int i = 0; i < chars.size(); i++)
+        chars.get(i).setVisible(false, val);
+    }
+    else
+      visible = val;
   }
 }
