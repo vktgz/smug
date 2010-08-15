@@ -5,6 +5,7 @@
 package smug;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -12,6 +13,8 @@ import java.util.ArrayList;
  */
 public class rlCircle
 {
+  private static HashMap cbuf = null;
+  
   private ArrayList<rlPoint> pbuf;
   private ArrayList<rlLine> lbuf;
 
@@ -70,5 +73,21 @@ public class rlCircle
     if ((idx >= 0) && (idx < lbuf.size()))
       tmp = lbuf.get(idx);
     return tmp;
+  }
+
+  public static rlCircle circle(int r)
+  {
+    rlCircle c = null;
+    if (cbuf == null)
+      cbuf = new HashMap();
+    Integer k = new Integer(r);
+    if (cbuf.containsKey(k))
+      c = (rlCircle)cbuf.get(k);
+    else
+    {
+      c = new rlCircle(new rlPoint(0, 0), r);
+      cbuf.put(k, c);
+    }
+    return c;
   }
 }

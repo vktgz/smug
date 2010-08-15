@@ -786,13 +786,13 @@ public class rlMap
 
   public void setVisible(int cx, int cy, int r)
   {
-    rlPoint cc = new rlPoint(cx, cy);
-    rlCircle c = new rlCircle(cc, r);
+    rlCircle c = rlCircle.circle(r);
     rlLine ln;
     rlPoint pt;
     rlObj o;
-    for (int x = 0; x < cols; x++)
-      for (int y = 0; y < rows; y++)
+    int x, y;
+    for (x = 0; x < cols; x++)
+      for (y = 0; y < rows; y++)
         map.get(y).get(x).setVisible(true, false);
     for (int l = 0; l < c.lines(); l++)
     {
@@ -800,13 +800,22 @@ public class rlMap
       for (int i = 0; i < ln.length(); i++)
       {
         pt = ln.get(i);
-        if ((pt.col >= 0) && (pt.col < cols) && (pt.row >=0) && (pt.row < rows))
+        x = pt.col + cx;
+        y = pt.row + cy;
+        if ((x >= 0) && (x < cols) && (y >=0) && (y < rows))
         {
-          o = map.get(pt.row).get(pt.col);
+          o = map.get(y).get(x);
           o.setVisible(false, true);
           o.setVisible(true, true);
           if (o instanceof rlWall)
             break;
+          if (o instanceof rlDoor)
+          {
+            rlDoor d = (rlDoor)o;
+            if (d.kind != rlDoor.Kind.PASS)
+              if (!d.open)
+                break;
+          }
         }
       }
     }

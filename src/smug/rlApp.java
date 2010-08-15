@@ -6,6 +6,9 @@ package smug;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -15,18 +18,23 @@ import javax.swing.WindowConstants;
  */
 public class rlApp
 {
+  final private int MSGS = 1000;
+
   private JFrame win;
   private rlBattlefield bf;
-  private int sx, sy;
+  private int sx, sy, nmsg;
   private rlKeyboard kbd;
   private rlMap map;
   private rlChar pc;
   private long time;
+  private LinkedList<String> mbuf;
 
   public rlApp()
   {
+    mbuf = new LinkedList<String>();
     sx = 0;
     sy = 0;
+    nmsg = 0;
     win = new JFrame("smug");
     win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     win.getContentPane().setLayout(null);
@@ -54,11 +62,13 @@ public class rlApp
       protected Void doInBackground()
       {
         initGame();
-        boolean quit = false;
+        boolean quit = false, draw = true;
         rlObj o;
         while (!quit)
         {
-          Redraw();
+          if (draw)
+            Redraw();
+          draw = false;
           time++;
           for (int t = 0; t < map.timer.size(); t++)
           {
@@ -74,6 +84,7 @@ public class rlApp
                 else
                   c.action();
                 c.resetTime();
+                draw = true;
               }
             }
           }
@@ -97,6 +108,7 @@ public class rlApp
     Dimension fs = bf.getSize();
     Insets fi = win.getInsets();
     win.setSize(new Dimension(fs.width + fi.left + fi.right, fs.height + fi.top + fi.bottom));
+    win.setLocationRelativeTo(null);
     map = new rlMap(100, 50);
     map.generateMap();
     pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', rlColor.DGRAY, rlColor.BLACK));
@@ -111,8 +123,9 @@ public class rlApp
   {
     map.setVisible(pc.x, pc.y, 3);
     map.fillBuf(bf.getBuffer());
-    bf.Refresh();
     bf.scroll(pc.x - 40 + sx, pc.y - 12 + sy);
+    drawMsg();
+    bf.Refresh();
   }
 
   private boolean getInput()
@@ -208,6 +221,12 @@ public class rlApp
         }
         kbd.rebound(KeyEvent.VK_LEFT);
       }
+      if (kbd.poll(KeyEvent.VK_O))
+      {
+        key = true;
+        openDoor();
+        kbd.rebound(KeyEvent.VK_Q);
+      }
       if (!key)
       {
         try
@@ -227,6 +246,12 @@ public class rlApp
     rlObj no = map.map.get(ty).get(tx);
     if ((no instanceof rlFloor) || (no instanceof rlDoor))
     {
+      if (no instanceof rlDoor)
+        if (!((rlDoor)no).open)
+        {
+          addMsg("Doors are closed.");
+          return;
+        }
       if (no.chars.isEmpty())
       {
         rlObj co = map.map.get(pc.y).get(pc.x);
@@ -237,11 +262,87 @@ public class rlApp
       }
     }
     else
-      addMsg("Can't move there");
+      addMsg("Can't move there.");
   }
 
   private void addMsg(String msg)
   {
-    //
+    mbuf.addLast(msg);
+    if (mbuf.size() > MSGS)
+      mbuf.removeFirst();
+    nmsg++;
+  }
+
+  private void drawMsg()
+  {
+    String line0 = "", line1 = "", tmp = "", msg = "";
+    if ((!mbuf.isEmpty()) && (nmsg > 0))
+    {
+      ListIterator<String> i = mbuf.listIterator(mbuf.size());
+      if (nmsg > 1)
+      {
+        msg = i.previous();
+        if (msg.length() > 80)
+        {
+          int d = msg.length() - 80;
+          line1 = msg.substring(d);
+          tmp = msg.substring(0, d);
+        }
+        else
+          line1 = msg;
+      }
+      if (tmp.length() > 0)
+      {
+        if (tmp.length() > 80)
+          line0 = tmp.substring(tmp.length() - 80);
+        else
+          line0 = tmp;
+      }
+      else if (i.hasPrevious())
+      {
+        msg = i.previous();
+        if (msg.length() > 80)
+          line0 = msg.substring(msg.length() - 80);
+        else
+          line0 = msg;
+      }
+      nmsg = 0;
+    }
+    char fill[];
+    if (line0.length() < 80)
+    {
+      fill = new char[80 - line0.length()];
+      Arrays.fill(fill, ' ');
+      line0 = line0.concat(new String(fill));
+    }
+    if (line1.length() < 80)
+    {
+      fill = new char[80 - line1.length()];
+      Arrays.fill(fill, ' ');
+      line1 = line1.concat(new String(fill));
+    }
+    bf.cleanOSD();
+    bf.drawStringOSD(new rlPoint(1, 1), line0);
+    bf.drawStringOSD(new rlPoint(1, 2), line1);
+  }
+
+  private void openDoor()
+  {
+    rlObj o;
+    for (int x = pc.x - 1; x < pc.x + 2; x++)
+      for (int y = pc.y - 1; y < pc.y + 2; y++)
+        if ((x != pc.x) || (y != pc.y))
+        {
+          o = map.map.get(y).get(x);
+          if (o instanceof rlDoor)
+          {
+            rlDoor d = (rlDoor)o;
+            if (!d.open)
+            {
+              d.open = true;
+              return;
+            }
+          }
+        }
   }
 }

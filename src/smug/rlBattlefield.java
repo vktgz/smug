@@ -20,7 +20,7 @@ public class rlBattlefield
 {
   private int cols, rows;
   private int cWidth, cHeight, cX, cY, sX, sY;
-  private rlBuffer buf;
+  private rlBuffer buf, osd;
   public boolean rlBuffered;
   private rlSymbol blank;
 
@@ -33,6 +33,7 @@ public class rlBattlefield
     sY = 0;
     blank = new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK);
     buf = new rlBuffer(cols, rows, blank);
+    osd = new rlBuffer(cols, rows, blank);
     rlBuffered = true;
     setBackground(rlColor.BLACK);
     setForeground(rlColor.GRAY);
@@ -47,6 +48,7 @@ public class rlBattlefield
     if (rows > 100)
       rows = 100;
     buf = new rlBuffer(cols, rows, blank);
+    osd = new rlBuffer(cols, rows, blank);
     Resize();
   }
 
@@ -58,6 +60,7 @@ public class rlBattlefield
     if (cols > 320)
       cols = 320;
     buf = new rlBuffer(cols, rows, blank);
+    osd = new rlBuffer(cols, rows, blank);
     Resize();
   }
 
@@ -106,6 +109,19 @@ public class rlBattlefield
         }
         g.setColor(s.fgColor);
         g.drawString(s.str(), x + cX, y + cY);
+        s = osd.get(c, r);
+        if (!s.equals(blank))
+        {
+          x = (c - 1) * cWidth;
+          y = (r - 1) * cHeight;
+          if (!s.bgColor.equals(getBackground()))
+          {
+            g.setColor(s.bgColor);
+            g.fillRect(x, y, cWidth, cHeight);
+          }
+          g.setColor(s.fgColor);
+          g.drawString(s.str(), x + cX, y + cY);
+        }
       }
   }
 
@@ -126,7 +142,7 @@ public class rlBattlefield
     return buf;
   }
 
-  public void drawrlLine(rlLine l, rlSymbol s)
+  public void drawLine(rlLine l, rlSymbol s)
   {
     rlPoint p;
     for (int i = 0; i < l.length(); i++)
@@ -144,6 +160,19 @@ public class rlBattlefield
       buf.put(p.col + i, p.row, new rlSymbol(s.charAt(i), getForeground(), getBackground()));
     if (!rlBuffered)
       Refresh();
+  }
+
+  public void drawStringOSD(rlPoint p, String s)
+  {
+    for (int i = 0; i < s.length(); i++)
+      osd.put(p.col + i, p.row, new rlSymbol(s.charAt(i), getForeground(), getBackground()));
+    if (!rlBuffered)
+      Refresh();
+  }
+
+  public void cleanOSD()
+  {
+    osd = new rlBuffer(cols, rows, blank);
   }
 
   public void drawRect(rlPoint tl, rlPoint br, rlSymbol b)

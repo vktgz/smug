@@ -27,13 +27,12 @@ public class rlWall
   @Override
   public rlSymbol getSymbol()
   {
-    rlSymbol s = super.getSymbol();
     if (kind == Kind.SIDE)
-      s.fgColor = rlColor.YELLOW;
+      smb.fgColor = rlColor.YELLOW;
     if (kind == Kind.ROCK)
-      s.fgColor = rlColor.DGRAY;
+      smb.fgColor = rlColor.DGRAY;
     if (kind == Kind.CORN)
-      s.fgColor = rlColor.RED;
-    return s;
+      smb.fgColor = rlColor.RED;
+    return super.getSymbol();
   }
 }
