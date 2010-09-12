@@ -1,38 +1,43 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * smug
+ * rlWall.java
+ * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * License: GPLv3
  */
+
 package smug;
 
-/**
- *
- * @author vktgz
- */
 public class rlWall
-  extends rlObj
+		extends rlObj
 {
-  public enum Kind
-  {
-    ROCK, WALL, CORN, SIDE
-  }
+	public enum Kind
+	{
+		ROCK, WALL, CORN, SIDE
+	}
+	//
+	public Kind kind;
 
-  public Kind kind;
+	public rlWall(Kind nkind)
+	{
+		super(Type.WALL, new rlSymbol('#', rlColor.GRAY, rlColor.BLACK), -1, -1);
+		kind = nkind;
+	}
 
-  public rlWall(Kind nkind)
-  {
-    super(Type.WALL, new rlSymbol('#', rlColor.GRAY, rlColor.BLACK), -1, -1);
-    kind = nkind;
-  }
-
-  @Override
-  public rlSymbol getSymbol()
-  {
-    if (kind == Kind.SIDE)
-      smb.fgColor = rlColor.YELLOW;
-    if (kind == Kind.ROCK)
-      smb.fgColor = rlColor.DGRAY;
-    if (kind == Kind.CORN)
-      smb.fgColor = rlColor.RED;
-    return super.getSymbol();
-  }
+	@Override
+	public rlSymbol getSymbol()
+	{
+		if (kind == Kind.SIDE)
+		{
+			smb.fgColor = rlColor.YELLOW;
+		}
+		if (kind == Kind.ROCK)
+		{
+			smb.fgColor = rlColor.DGRAY;
+		}
+		if (kind == Kind.CORN)
+		{
+			smb.fgColor = rlColor.RED;
+		}
+		return super.getSymbol();
+	}
 }

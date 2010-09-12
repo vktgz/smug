@@ -1,16 +1,15 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * smug
+ * rlMap.java
+ * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * License: GPLv3
  */
+
 package smug;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-/**
- *
- * @author vktgz
- */
 public class rlMap
 {
 	final private int MIN_ROOMS = 3;

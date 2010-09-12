@@ -1,31 +1,30 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * smug
+ * rlSymbol.java
+ * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * License: GPLv3
  */
+
 package smug;
+
 import java.awt.Color;
 
-/**
- *
- * @author vktgz
- */
 public class rlSymbol
 {
-  final public static rlSymbol FOG = new rlSymbol(' ', rlColor.BLACK, rlColor.BLACK);
+	final public static rlSymbol FOG = new rlSymbol(' ', rlColor.BLACK, rlColor.BLACK);
+	//
+	public char code;
+	public Color fgColor, bgColor;
 
-  public char code;
-  public Color fgColor, bgColor;
+	public rlSymbol(char val, Color fg, Color bg)
+	{
+		code = val;
+		fgColor = fg;
+		bgColor = bg;
+	}
 
-  /** Creates a new instance of symbol */
-  public rlSymbol(char val, Color fg, Color bg)
-  {
-    code = val;
-    fgColor = fg;
-    bgColor = bg;
-  }
-
-  public String str()
-  {
-    return String.valueOf(code);
-  }
+	public String str()
+	{
+		return String.valueOf(code);
+	}
 }

@@ -1,16 +1,15 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * smug
+ * rlCircle.java
+ * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * License: GPLv3
  */
+
 package smug;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- *
- * @author vktgz
- */
 public class rlCircle
 {
 	private static HashMap cbuf = null;

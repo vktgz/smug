@@ -1,26 +1,25 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * smug
+ * rlFloor.java
+ * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * License: GPLv3
  */
+
 package smug;
 
-/**
- *
- * @author vktgz
- */
 public class rlFloor
-  extends rlObj
+		extends rlObj
 {
-  public enum Kind
-  {
-    ROOM, TUNN
-  }
+	public enum Kind
+	{
+		ROOM, TUNN
+	}
+	//
+	public Kind kind;
 
-  public Kind kind;
-
-  public rlFloor(Kind nkind, int nx, int ny)
-  {
-    super(Type.FLOOR, new rlSymbol('.', rlColor.GRAY, rlColor.BLACK), nx, ny);
-    kind = nkind;
-  }
+	public rlFloor(Kind nkind, int nx, int ny)
+	{
+		super(Type.FLOOR, new rlSymbol('.', rlColor.GRAY, rlColor.BLACK), nx, ny);
+		kind = nkind;
+	}
 }

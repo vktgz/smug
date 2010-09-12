@@ -1,7 +1,10 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * smug
+ * rlApp.java
+ * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * License: GPLv3
  */
+
 package smug;
 
 import java.awt.Dimension;
@@ -14,10 +17,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
-/**
- *
- * @author vktgz
- */
 public class rlApp
 {
 	final private int MSGS = 1000;
@@ -150,7 +149,7 @@ public class rlApp
 			if (kbd.poll(KeyEvent.VK_D))
 			{
 				key = true;
-/*        fs = bf.getSize();
+				/*        fs = bf.getSize();
 				System.out.println("bf: " + Integer.toString(fs.width) + ", " + Integer.toString(fs.height));
 				fs = win.getSize();
 				System.out.println("fr: " + Integer.toString(fs.width) + ", " + Integer.toString(fs.height));
