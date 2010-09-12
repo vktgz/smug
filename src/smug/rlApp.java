@@ -8,6 +8,7 @@
 package smug;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
@@ -45,7 +46,7 @@ public class rlApp
 		bf.setRows(25);
 		rlBuffer buf = new rlBuffer(100, 50, new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK));
 		bf.setBuffer(buf);
-		bf.setFont(new java.awt.Font("Monospaced", 1, 18));
+		bf.setFont(new Font("Monospaced", 1, 18));
 		win.getContentPane().add(bf);
 		win.setPreferredSize(bf.getPreferredSize());
 		win.setResizable(false);
@@ -113,9 +114,7 @@ public class rlApp
 
 	private void initGame()
 	{
-		Dimension fs = bf.getSize();
-		Insets fi = win.getInsets();
-		win.setSize(new Dimension(fs.width + fi.left + fi.right, fs.height + fi.top + fi.bottom));
+		fixWindow();
 		win.setLocationRelativeTo(null);
 		map = new rlMap(100, 50);
 		map.generateMap();
@@ -125,6 +124,13 @@ public class rlApp
 		pc.x = map.stUp.x;
 		pc.y = map.stUp.y;
 		time = 0;
+	}
+
+	private void fixWindow()
+	{
+		Dimension fs = bf.getSize();
+		Insets fi = win.getInsets();
+		win.setSize(new Dimension(fs.width + fi.left + fi.right, fs.height + fi.top + fi.bottom));
 	}
 
 	private void Redraw()
@@ -160,7 +166,10 @@ public class rlApp
 			if (kbd.poll(KeyEvent.VK_Q))
 			{
 				key = true;
-				quit = true;
+				if (ctrl)
+				{
+					quit = true;
+				}
 				kbd.rebound(KeyEvent.VK_Q);
 			}
 			if (kbd.poll(KeyEvent.VK_UP))
@@ -253,11 +262,128 @@ public class rlApp
 				}
 				kbd.rebound(KeyEvent.VK_LEFT);
 			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD8))
+			{
+				key = true;
+				if (shift)
+				{
+					sy--;
+				}
+				else
+				{
+					movePC(pc.x, pc.y - 1);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD8);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD2))
+			{
+				key = true;
+				if (shift)
+				{
+					sy++;
+				}
+				else
+				{
+					movePC(pc.x, pc.y + 1);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD2);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD6))
+			{
+				key = true;
+				if (shift)
+				{
+					sx++;
+				}
+				else
+				{
+					movePC(pc.x + 1, pc.y);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD6);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD9))
+			{
+				key = true;
+				if (shift)
+				{
+					sx++;
+					sy--;
+				}
+				else
+				{
+					movePC(pc.x + 1, pc.y - 1);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD9);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD3))
+			{
+				key = true;
+				if (shift)
+				{
+					sx++;
+					sy++;
+				}
+				else
+				{
+					movePC(pc.x + 1, pc.y + 1);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD3);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD4))
+			{
+				key = true;
+				if (shift)
+				{
+					sx--;
+				}
+				else
+				{
+					movePC(pc.x - 1, pc.y);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD4);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD7))
+			{
+				key = true;
+				if (shift)
+				{
+					sx--;
+					sy--;
+				}
+				else
+				{
+					movePC(pc.x - 1, pc.y - 1);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD7);
+			}
+			if (kbd.poll(KeyEvent.VK_NUMPAD1))
+			{
+				key = true;
+				if (shift)
+				{
+					sx--;
+					sy++;
+				}
+				else
+				{
+					movePC(pc.x - 1, pc.y + 1);
+				}
+				kbd.rebound(KeyEvent.VK_NUMPAD1);
+			}
 			if (kbd.poll(KeyEvent.VK_O))
 			{
 				key = true;
 				openDoor();
-				kbd.rebound(KeyEvent.VK_Q);
+				kbd.rebound(KeyEvent.VK_O);
+			}
+			if (kbd.poll(KeyEvent.VK_F))
+			{
+				key = true;
+				if (ctrl)
+				{
+					selectFont();
+				}
+				kbd.rebound(KeyEvent.VK_F);
 			}
 			if (!key)
 			{
@@ -395,6 +521,19 @@ public class rlApp
 					}
 				}
 			}
+		}
+	}
+
+	private void selectFont()
+	{
+		rlFont dlg = new rlFont(win);
+		dlg.setFont(bf.getFont());
+		dlg.setLocationRelativeTo(win);
+		dlg.setVisible(true);
+		if (dlg.ok)
+		{
+			bf.setFont(dlg.getFont());
+			fixWindow();
 		}
 	}
 }
