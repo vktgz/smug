@@ -11,9 +11,18 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.jnlp.BasicService;
+import javax.jnlp.FileContents;
+import javax.jnlp.PersistenceService;
+import javax.jnlp.ServiceManager;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -30,6 +39,9 @@ public class rlApp
 	private rlChar pc;
 	private long time;
 	private LinkedList<String> mbuf;
+	private BasicService bs;
+	private PersistenceService ps;
+	private URL codebase;
 
 	public rlApp()
 	{
@@ -46,7 +58,7 @@ public class rlApp
 		bf.setRows(25);
 		rlBuffer buf = new rlBuffer(100, 50, new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK));
 		bf.setBuffer(buf);
-		bf.setFont(new Font("Monospaced", 1, 18));
+		bf.setFont(new Font("Monospaced", 1, 14));
 		win.getContentPane().add(bf);
 		win.setPreferredSize(bf.getPreferredSize());
 		win.setResizable(false);
@@ -64,6 +76,7 @@ public class rlApp
 			@Override
 			protected Void doInBackground()
 			{
+				loadData();
 				initGame();
 				boolean quit = false, draw = true;
 				rlObj o;
@@ -105,6 +118,7 @@ public class rlApp
 			protected void done()
 			{
 				win.setVisible(false);
+				saveData();
 				System.out.println("Terminated.");
 				System.exit(0);
 			}
@@ -114,8 +128,17 @@ public class rlApp
 
 	private void initGame()
 	{
-		fixWindow();
-		win.setLocationRelativeTo(null);
+		try
+		{
+			Thread.sleep(100);
+			fixWindow();
+			Thread.sleep(100);
+			win.setLocationRelativeTo(null);
+			Thread.sleep(100);
+		}
+		catch (InterruptedException ex)
+		{
+		}
 		map = new rlMap(100, 50);
 		map.generateMap();
 		pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', rlColor.DGRAY, rlColor.BLACK));
@@ -155,12 +178,6 @@ public class rlApp
 			if (kbd.poll(KeyEvent.VK_D))
 			{
 				key = true;
-				/*        fs = bf.getSize();
-				System.out.println("bf: " + Integer.toString(fs.width) + ", " + Integer.toString(fs.height));
-				fs = win.getSize();
-				System.out.println("fr: " + Integer.toString(fs.width) + ", " + Integer.toString(fs.height));
-				fi = win.getInsets();
-				System.out.println("in: " + Integer.toString(fi.top) + ", " + Integer.toString(fi.bottom) + ", " + Integer.toString(fi.left) + ", " + Integer.toString(fi.right)); */
 				kbd.rebound(KeyEvent.VK_D);
 			}
 			if (kbd.poll(KeyEvent.VK_Q))
@@ -534,6 +551,55 @@ public class rlApp
 		{
 			bf.setFont(dlg.getFont());
 			fixWindow();
+		}
+	}
+
+	private void loadData()
+	{
+		try
+		{
+			bs = (BasicService)ServiceManager.lookup("javax.jnlp.BasicService");
+			ps = (PersistenceService)ServiceManager.lookup("javax.jnlp.PersistenceService");
+			codebase = bs.getCodeBase();
+			FileContents fc = ps.get(codebase);
+			InputStream is = fc.getInputStream();
+			int bufl = is.read();
+			byte[] buf = new byte[bufl];
+			is.read(buf);
+			int fnSize = is.read();
+			is.close();
+			String fnName = new String(buf);
+			bf.setFont(new Font(fnName, 1, fnSize));
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Loading data failed.");
+		}
+	}
+
+	private void saveData()
+	{
+		try
+		{
+			ps.delete(codebase);
+		}
+		catch (Exception ex)
+		{
+		}
+		try
+		{
+			byte[] buf = bf.getFont().getFamily().getBytes();
+			ps.create(codebase, buf.length + 2);
+			FileContents fc = ps.get(codebase);
+			OutputStream os = fc.getOutputStream(true);
+			os.write(buf.length);
+			os.write(buf);
+			os.write(bf.getFont().getSize());
+			os.close();
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Saving data failed.");
 		}
 	}
 }
