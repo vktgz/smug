@@ -23,6 +23,8 @@ public class rlDoor
 	public Dir dir;
 	public Kind kind;
 	public boolean open;
+	public String dID;
+	public int dLvl;
 
 	public rlDoor(Dir ndir, Kind nkind, int nx, int ny)
 	{
@@ -42,6 +44,8 @@ public class rlDoor
 			smb.fgColor = rlColor.GRAY;
 			open = true;
 		}
+		dID = "";
+		dLvl = 0;
 	}
 
 	@Override
@@ -55,5 +59,16 @@ public class rlDoor
 			}
 		}
 		return super.getSymbol();
+	}
+
+	public void setID(String nID, int nLvl)
+	{
+		dID = nID;
+		dLvl = nLvl;
+	}
+
+	public String getID()
+	{
+		return dID + Integer.toString(dLvl);
 	}
 }

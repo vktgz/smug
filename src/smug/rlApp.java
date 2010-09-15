@@ -15,10 +15,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jnlp.BasicService;
 import javax.jnlp.FileContents;
 import javax.jnlp.PersistenceService;
@@ -42,10 +41,12 @@ public class rlApp
 	private BasicService bs;
 	private PersistenceService ps;
 	private URL codebase;
+	private HashMap maps;
 
 	public rlApp()
 	{
 		mbuf = new LinkedList<String>();
+		maps = new HashMap();
 		sx = 0;
 		sy = 0;
 		nmsg = 0;
@@ -139,7 +140,7 @@ public class rlApp
 		catch (InterruptedException ex)
 		{
 		}
-		map = new rlMap(100, 50);
+		map = new rlMap(100, 50, "INF", 1);
 		map.generateMap();
 		pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', rlColor.DGRAY, rlColor.BLACK));
 		map.stUp.chars.add(pc);
@@ -147,6 +148,7 @@ public class rlApp
 		pc.x = map.stUp.x;
 		pc.y = map.stUp.y;
 		time = 0;
+		maps.put(map.getID(), map);
 	}
 
 	private void fixWindow()
@@ -161,7 +163,9 @@ public class rlApp
 		map.setVisible(pc.x, pc.y, 3);
 		map.fillBuf(bf.getBuffer());
 		bf.scroll(pc.x - 40 + sx, pc.y - 12 + sy);
+		bf.cleanOSD();
 		drawMsg();
+		drawStatus();
 		bf.Refresh();
 	}
 
@@ -393,6 +397,52 @@ public class rlApp
 				openDoor();
 				kbd.rebound(KeyEvent.VK_O);
 			}
+			if (kbd.poll(KeyEvent.VK_PERIOD))
+			{
+				key = true;
+				if (shift)
+				{
+					boolean mvd = false;
+					rlObj o = map.map.get(pc.y).get(pc.x);
+					if (o instanceof rlDoor)
+					{
+						rlDoor p = (rlDoor)o;
+						if (p.dir == rlDoor.Dir.D)
+						{
+							moveMap(p);
+							mvd = true;
+						}
+					}
+					if (!mvd)
+					{
+						addMsg("There are no stairs to descend.");
+					}
+				}
+				kbd.rebound(KeyEvent.VK_PERIOD);
+			}
+			if (kbd.poll(KeyEvent.VK_COMMA))
+			{
+				key = true;
+				if (shift)
+				{
+					boolean mvd = false;
+					rlObj o = map.map.get(pc.y).get(pc.x);
+					if (o instanceof rlDoor)
+					{
+						rlDoor p = (rlDoor)o;
+						if (p.dir == rlDoor.Dir.U)
+						{
+							moveMap(p);
+							mvd = true;
+						}
+					}
+					if (!mvd)
+					{
+						addMsg("There are no stairs to ascend.");
+					}
+				}
+				kbd.rebound(KeyEvent.VK_COMMA);
+			}
 			if (kbd.poll(KeyEvent.VK_F))
 			{
 				key = true;
@@ -499,20 +549,8 @@ public class rlApp
 			}
 			nmsg = 0;
 		}
-		char fill[];
-		if (line0.length() < 80)
-		{
-			fill = new char[80 - line0.length()];
-			Arrays.fill(fill, ' ');
-			line0 = line0.concat(new String(fill));
-		}
-		if (line1.length() < 80)
-		{
-			fill = new char[80 - line1.length()];
-			Arrays.fill(fill, ' ');
-			line1 = line1.concat(new String(fill));
-		}
-		bf.cleanOSD();
+		line0 = rlUtl.fill(line0, ' ', 80, false);
+		line1 = rlUtl.fill(line1, ' ', 80, false);
 		bf.drawStringOSD(new rlPoint(1, 1), line0);
 		bf.drawStringOSD(new rlPoint(1, 2), line1);
 	}
@@ -539,6 +577,7 @@ public class rlApp
 				}
 			}
 		}
+		addMsg("There are no doors to open.");
 	}
 
 	private void selectFont()
@@ -601,5 +640,43 @@ public class rlApp
 		{
 			System.err.println("Saving data failed.");
 		}
+	}
+
+	private void moveMap(rlDoor p)
+	{
+		rlMap nmap = (rlMap)maps.get(p.getID());
+		if (nmap == null)
+		{
+			nmap = new rlMap(100, 50, p.dID, p.dLvl);
+			nmap.generateMap();
+			maps.put(nmap.getID(), nmap);
+		}
+		p.chars.remove(pc);
+		if (p.dir == rlDoor.Dir.U)
+		{
+			nmap.stDown.chars.add(pc);
+			pc.x = nmap.stDown.x;
+			pc.y = nmap.stDown.y;
+		}
+		if (p.dir == rlDoor.Dir.D)
+		{
+			nmap.stUp.chars.add(pc);
+			pc.x = nmap.stUp.x;
+			pc.y = nmap.stUp.y;
+		}
+		map.timer.remove(pc);
+		nmap.timer.add(pc);
+		map = nmap;
+	}
+
+	private void drawStatus()
+	{
+		String line0 = "", line1 = "";
+		line0 = "Player Str: 10";
+		line1 = "Level: " + map.getID();
+		line0 = rlUtl.fill(line0, ' ', 80, false);
+		line1 = rlUtl.fill(line1, ' ', 80, true);
+		bf.drawStringOSD(new rlPoint(1, 24), line0);
+		bf.drawStringOSD(new rlPoint(1, 25), line1);
 	}
 }

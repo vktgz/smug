@@ -28,11 +28,15 @@ public class rlMap
 	private ArrayList<rlObj> graf;
 	public ArrayList<rlObj> timer;
 	public rlDoor stUp, stDown;
+	private String mID;
+	private int mLvl;
 
-	public rlMap(int ncols, int nrows)
+	public rlMap(int ncols, int nrows, String nID, int nLvl)
 	{
 		cols = ncols;
 		rows = nrows;
+		mID = nID;
+		mLvl = nLvl;
 		timer = new ArrayList<rlObj>();
 		doors = new ArrayList<rlDoor>();
 		graf = new ArrayList<rlObj>();
@@ -967,6 +971,7 @@ public class rlMap
 			if (done)
 			{
 				stUp = new rlDoor(rlDoor.Dir.U, rlDoor.Kind.PASS, x, y);
+				stUp.setID(mID, mLvl - 1);
 				map.get(y).set(x, stUp);
 			}
 		}
@@ -983,6 +988,7 @@ public class rlMap
 				if (done)
 				{
 					stDown = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, x, y);
+					stDown.setID(mID, mLvl + 1);
 					map.get(y).set(x, stDown);
 				}
 			}
@@ -1034,5 +1040,10 @@ public class rlMap
 				}
 			}
 		}
+	}
+
+	public String getID()
+	{
+		return mID + Integer.toString(mLvl);
 	}
 }
