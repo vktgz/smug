@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -140,13 +139,13 @@ public class rlApp
 		catch (InterruptedException ex)
 		{
 		}
-		map = new rlMap(100, 50, "INF", 1);
-		map.generateMap();
+		map = new rlMap(32, 16, "CTY", 0);
+		map.generateSpecialMap("CTY");
 		pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', rlColor.DGRAY, rlColor.BLACK));
-		map.stUp.chars.add(pc);
+		map.map.get(2).get(2).chars.add(pc);
 		map.timer.add(pc);
-		pc.x = map.stUp.x;
-		pc.y = map.stUp.y;
+		pc.x = 2;
+		pc.y = 2;
 		time = 0;
 		maps.put(map.getID(), map);
 	}
@@ -642,28 +641,14 @@ public class rlApp
 		}
 	}
 
-	private void moveMap(rlDoor p)
+	private void moveMap(rlDoor st)
 	{
-		rlMap nmap = (rlMap)maps.get(p.getID());
-		if (nmap == null)
-		{
-			nmap = new rlMap(100, 50, p.dID, p.dLvl);
-			nmap.generateMap();
-			maps.put(nmap.getID(), nmap);
-		}
-		p.chars.remove(pc);
-		if (p.dir == rlDoor.Dir.U)
-		{
-			nmap.stDown.chars.add(pc);
-			pc.x = nmap.stDown.x;
-			pc.y = nmap.stDown.y;
-		}
-		if (p.dir == rlDoor.Dir.D)
-		{
-			nmap.stUp.chars.add(pc);
-			pc.x = nmap.stUp.x;
-			pc.y = nmap.stUp.y;
-		}
+		rlMap nmap = getMap(st);
+		st.chars.remove(pc);
+		rlDoor nst = (rlDoor)nmap.stairs.get(map.getID());
+		nst.chars.add(pc);
+		pc.x = nst.x;
+		pc.y = nst.y;
 		map.timer.remove(pc);
 		nmap.timer.add(pc);
 		map = nmap;
@@ -673,10 +658,37 @@ public class rlApp
 	{
 		String line0 = "", line1 = "";
 		line0 = "Player Str: 10";
-		line1 = "Level: " + map.getID();
+		if (map.mLvl > 0)
+		{
+			line1 = "Level: " + map.getID();
+		}
+		else
+		{
+			line1 = "Level: " + map.mID;
+		}
 		line0 = rlUtl.fill(line0, ' ', 80, false);
 		line1 = rlUtl.fill(line1, ' ', 80, true);
 		bf.drawStringOSD(new rlPoint(1, 24), line0);
 		bf.drawStringOSD(new rlPoint(1, 25), line1);
+	}
+
+	private rlMap getMap(rlDoor st)
+	{
+		rlMap nmap = (rlMap)maps.get(st.getID());
+		if (nmap == null)
+		{
+			nmap = new rlMap(100, 50, st.dID, st.dLvl);
+			nmap.generateRandomMap();
+			if (st.dLvl == 1)
+			{
+				String fID = st.dID + Integer.toString(0);
+				rlDoor nst = (rlDoor)nmap.stairs.get(fID);
+				nmap.stairs.remove(fID);
+				nst.setID("CTY", 0);
+				nmap.stairs.put(nst.getID(), nst);
+			}
+			maps.put(nmap.getID(), nmap);
+		}
+		return nmap;
 	}
 }

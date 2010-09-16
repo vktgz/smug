@@ -8,6 +8,7 @@
 package smug;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 public class rlMap
@@ -25,11 +26,11 @@ public class rlMap
 	private int cols;
 	private int rows;
 	private ArrayList<rlDoor> doors;
+	public HashMap stairs;
 	private ArrayList<rlObj> graf;
 	public ArrayList<rlObj> timer;
-	public rlDoor stUp, stDown;
-	private String mID;
-	private int mLvl;
+	public String mID;
+	public int mLvl;
 
 	public rlMap(int ncols, int nrows, String nID, int nLvl)
 	{
@@ -39,6 +40,7 @@ public class rlMap
 		mLvl = nLvl;
 		timer = new ArrayList<rlObj>();
 		doors = new ArrayList<rlDoor>();
+		stairs = new HashMap();
 		graf = new ArrayList<rlObj>();
 		map = new ArrayList<ArrayList<rlObj>>(rows);
 		cleanMap();
@@ -68,7 +70,7 @@ public class rlMap
 		}
 	}
 
-	public void generateMap()
+	public void generateRandomMap()
 	{
 		Random gen = new Random();
 		boolean done = false;
@@ -970,9 +972,10 @@ public class rlMap
 			done = checkStair(x, y);
 			if (done)
 			{
-				stUp = new rlDoor(rlDoor.Dir.U, rlDoor.Kind.PASS, x, y);
-				stUp.setID(mID, mLvl - 1);
-				map.get(y).set(x, stUp);
+				rlDoor s = new rlDoor(rlDoor.Dir.U, rlDoor.Kind.PASS, x, y);
+				s.setID(mID, mLvl - 1);
+				map.get(y).set(x, s);
+				stairs.put(s.getID(), s);
 			}
 		}
 		lx = x;
@@ -987,9 +990,10 @@ public class rlMap
 				done = Math.abs(lx - x) > MAX_ROOM_SIZE;
 				if (done)
 				{
-					stDown = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, x, y);
-					stDown.setID(mID, mLvl + 1);
-					map.get(y).set(x, stDown);
+					rlDoor s = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, x, y);
+					s.setID(mID, mLvl + 1);
+					map.get(y).set(x, s);
+					stairs.put(s.getID(), s);
 				}
 			}
 		}
@@ -1045,5 +1049,23 @@ public class rlMap
 	public String getID()
 	{
 		return mID + Integer.toString(mLvl);
+	}
+
+	void generateSpecialMap(String gID)
+	{
+		if (gID.equals("CTY"))
+		{
+			for (int r = 1; r < rows - 1; r++)
+			{
+				for (int c = 1; c < cols - 1; c++)
+				{
+					map.get(r).set(c, new rlFloor(rlFloor.Kind.ROOM, c, r));
+				}
+			}
+			rlDoor s = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, 7, 7);
+			s.setID("INF", 1);
+			map.get(7).set(7, s);
+			stairs.put(s.getID(), s);
+		}
 	}
 }
