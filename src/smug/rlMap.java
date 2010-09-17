@@ -70,7 +70,7 @@ public class rlMap
 		}
 	}
 
-	public void generateRandomMap()
+	public void generateRandomMap(rlDoor.Dir dv)
 	{
 		Random gen = new Random();
 		boolean done = false;
@@ -89,9 +89,8 @@ public class rlMap
 				generateFreeDoor();
 			}
 			done = generateTunnels();
-//      done = true;
 		}
-		generateStairs();
+		generateStairs(dv);
 	}
 
 	private void generateRoom()
@@ -960,10 +959,10 @@ public class rlMap
 		}
 	}
 
-	private void generateStairs()
+	private void generateStairs(rlDoor.Dir dv)
 	{
 		Random gen = new Random();
-		int x = 0, y = 0, lx = 0;
+		int x = 0, y = 0, lx = 0, dl = 0;
 		boolean done = false;
 		while (!done)
 		{
@@ -973,7 +972,15 @@ public class rlMap
 			if (done)
 			{
 				rlDoor s = new rlDoor(rlDoor.Dir.U, rlDoor.Kind.PASS, x, y);
-				s.setID(mID, mLvl - 1);
+				if (dv == rlDoor.Dir.D)
+				{
+					dl = -1;
+				}
+				else
+				{
+					dl = 1;
+				}
+				s.setID(mID, mLvl + dl);
 				map.get(y).set(x, s);
 				stairs.put(s.getID(), s);
 			}
@@ -991,7 +998,15 @@ public class rlMap
 				if (done)
 				{
 					rlDoor s = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, x, y);
-					s.setID(mID, mLvl + 1);
+					if (dv == rlDoor.Dir.D)
+					{
+						dl = 1;
+					}
+					else
+					{
+						dl = -1;
+					}
+					s.setID(mID, mLvl + dl);
 					map.get(y).set(x, s);
 					stairs.put(s.getID(), s);
 				}
@@ -1059,13 +1074,49 @@ public class rlMap
 			{
 				for (int c = 1; c < cols - 1; c++)
 				{
-					map.get(r).set(c, new rlFloor(rlFloor.Kind.ROOM, c, r));
+					if (((((r == 5) || (r == 9)) && (c > 4) && (c < 10)) || (((c == 5) || (c == 9)) && (r > 4) && (r < 10))) || ((((r == 5) || (r == 9)) && (c > 21) && (c < 27)) || (((c == 22) || (c == 26)) && (r > 4) && (r < 10))))
+					{
+						map.get(r).set(c, new rlWall(rlWall.Kind.ROCK));
+					}
+					else
+					{
+						map.get(r).set(c, new rlFloor(rlFloor.Kind.ROOM, c, r));
+					}
 				}
 			}
-			rlDoor s = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, 7, 7);
-			s.setID("INF", 1);
-			map.get(7).set(7, s);
-			stairs.put(s.getID(), s);
+			map.get(7).set(9, new rlDoor(rlDoor.Dir.E, rlDoor.Kind.ROOM, 9, 7));
+			map.get(7).set(22, new rlDoor(rlDoor.Dir.W, rlDoor.Kind.ROOM, 22, 7));
+			for (int c = 14; c < 19; c++)
+			{
+				map.get(9).set(c, new rlWall(rlWall.Kind.ROCK));
+				map.get(13).set(c, new rlWall(rlWall.Kind.ROCK));
+			}
+			map.get(12).set(18, new rlWall(rlWall.Kind.ROCK));
+			map.get(12).set(14, new rlWall(rlWall.Kind.ROCK));
+			map.get(11).set(19, new rlWall(rlWall.Kind.ROCK));
+			map.get(11).set(18, new rlWall(rlWall.Kind.ROCK));
+			map.get(11).set(17, new rlWall(rlWall.Kind.ROCK));
+			map.get(11).set(16, new rlWall(rlWall.Kind.ROCK));
+			map.get(11).set(14, new rlWall(rlWall.Kind.ROCK));
+			map.get(11).set(13, new rlWall(rlWall.Kind.ROCK));
+			map.get(10).set(19, new rlWall(rlWall.Kind.ROCK));
+			map.get(10).set(13, new rlWall(rlWall.Kind.ROCK));
+			map.get(9).set(19, new rlWall(rlWall.Kind.ROCK));
+			map.get(9).set(13, new rlWall(rlWall.Kind.ROCK));
+			map.get(9).set(18, new rlDoor(rlDoor.Dir.N, rlDoor.Kind.ROOM, 18, 9));
+			rlDoor st;
+			st = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, 7, 7);
+			st.setID("INF", 1);
+			map.get(7).set(7, st);
+			stairs.put(st.getID(), st);
+			st = new rlDoor(rlDoor.Dir.D, rlDoor.Kind.PASS, 24, 7);
+			st.setID("RDM", 1);
+			map.get(7).set(24, st);
+			stairs.put(st.getID(), st);
+			st = new rlDoor(rlDoor.Dir.U, rlDoor.Kind.PASS, 17, 12);
+			st.setID("TWR", 1);
+			map.get(12).set(17, st);
+			stairs.put(st.getID(), st);
 		}
 	}
 }

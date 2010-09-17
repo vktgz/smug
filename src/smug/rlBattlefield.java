@@ -124,11 +124,8 @@ public class rlBattlefield
 				{
 					x = (c - 1) * cWidth;
 					y = (r - 1) * cHeight;
-					if (!s.bgColor.equals(getBackground()))
-					{
-						g.setColor(s.bgColor);
-						g.fillRect(x, y, cWidth, cHeight);
-					}
+					g.setColor(s.bgColor);
+					g.fillRect(x, y, cWidth, cHeight);
 					g.setColor(s.fgColor);
 					g.drawString(s.str(), x + cX, y + cY);
 				}

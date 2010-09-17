@@ -56,7 +56,7 @@ public class rlApp
 		bf = new rlBattlefield();
 		bf.setCols(80);
 		bf.setRows(25);
-		rlBuffer buf = new rlBuffer(100, 50, new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK));
+		rlBuffer buf = new rlBuffer(320, 100, new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK));
 		bf.setBuffer(buf);
 		bf.setFont(new Font("Monospaced", 1, 14));
 		win.getContentPane().add(bf);
@@ -160,6 +160,7 @@ public class rlApp
 	private void Redraw()
 	{
 		map.setVisible(pc.x, pc.y, 3);
+		bf.getBuffer().clear();
 		map.fillBuf(bf.getBuffer());
 		bf.scroll(pc.x - 40 + sx, pc.y - 12 + sy);
 		bf.cleanOSD();
@@ -678,7 +679,14 @@ public class rlApp
 		if (nmap == null)
 		{
 			nmap = new rlMap(100, 50, st.dID, st.dLvl);
-			nmap.generateRandomMap();
+			if (nmap.mID.equals("TWR"))
+			{
+				nmap.generateRandomMap(rlDoor.Dir.U);
+			}
+			else
+			{
+				nmap.generateRandomMap(rlDoor.Dir.D);
+			}
 			if (st.dLvl == 1)
 			{
 				String fID = st.dID + Integer.toString(0);
@@ -687,7 +695,10 @@ public class rlApp
 				nst.setID("CTY", 0);
 				nmap.stairs.put(nst.getID(), nst);
 			}
-			maps.put(nmap.getID(), nmap);
+			if (!nmap.mID.equals("RDM"))
+			{
+				maps.put(nmap.getID(), nmap);
+			}
 		}
 		return nmap;
 	}

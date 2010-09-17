@@ -33,6 +33,17 @@ public class rlBuffer
 		}
 	}
 
+	public void clear()
+	{
+		for (int r = 0; r < rows; r++)
+		{
+			for (int c = 0; c < cols; c++)
+			{
+				buf.get(r).set(c, empty);
+			}
+		}
+	}
+
 	public void put(int col, int row, rlSymbol val)
 	{
 		if ((col > 0) && (col <= cols) && (row > 0) && (row <= rows))
