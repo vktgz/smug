@@ -57,6 +57,10 @@ public class rlDoor
 			{
 				smb.code = '/';
 			}
+			else
+			{
+				smb.code = '+';
+			}
 		}
 		return super.getSymbol();
 	}

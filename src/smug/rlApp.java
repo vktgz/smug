@@ -394,8 +394,14 @@ public class rlApp
 			if (kbd.poll(KeyEvent.VK_O))
 			{
 				key = true;
-				openDoor();
+				openDoor(true);
 				kbd.rebound(KeyEvent.VK_O);
+			}
+			if (kbd.poll(KeyEvent.VK_C))
+			{
+				key = true;
+				openDoor(false);
+				kbd.rebound(KeyEvent.VK_C);
 			}
 			if (kbd.poll(KeyEvent.VK_PERIOD))
 			{
@@ -555,7 +561,7 @@ public class rlApp
 		bf.drawStringOSD(new rlPoint(1, 2), line1);
 	}
 
-	private void openDoor()
+	private void openDoor(boolean ns)
 	{
 		rlObj o;
 		for (int x = pc.x - 1; x < pc.x + 2; x++)
@@ -568,16 +574,23 @@ public class rlApp
 					if (o instanceof rlDoor)
 					{
 						rlDoor d = (rlDoor)o;
-						if (!d.open)
+						if ((d.kind != rlDoor.Kind.PASS) && (d.open != ns))
 						{
-							d.open = true;
+							d.open = ns;
 							return;
 						}
 					}
 				}
 			}
 		}
-		addMsg("There are no doors to open.");
+		if (ns)
+		{
+			addMsg("There are no doors to open.");
+		}
+		else
+		{
+			addMsg("There are no doors to close.");
+		}
 	}
 
 	private void selectFont()
