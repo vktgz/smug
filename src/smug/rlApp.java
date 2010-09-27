@@ -447,6 +447,20 @@ public class rlApp
 						addMsg("There are no stairs to ascend.");
 					}
 				}
+				else
+				{
+					rlObj o = map.map.get(pc.y).get(pc.x);
+					if (o.items.isEmpty())
+					{
+						addMsg("There is nothing to pickup.");
+
+					}
+					else
+					{
+						pickup(o);
+
+					}
+				}
 				kbd.rebound(KeyEvent.VK_COMMA);
 			}
 			if (kbd.poll(KeyEvent.VK_F))
@@ -714,5 +728,15 @@ public class rlApp
 			}
 		}
 		return nmap;
+	}
+
+	private void pickup(rlObj o)
+	{
+		while (!o.items.isEmpty())
+		{
+			rlItem i = (rlItem)o.items.remove(0);
+			addMsg("You pickup ".concat(i.getName()).concat("."));
+			pc.items.add(i);
+		}
 	}
 }

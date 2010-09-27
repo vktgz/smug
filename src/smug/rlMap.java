@@ -91,6 +91,7 @@ public class rlMap
 			done = generateTunnels();
 		}
 		generateStairs(dv);
+		generateItems();
 	}
 
 	private void generateRoom()
@@ -1117,6 +1118,50 @@ public class rlMap
 			st.setID("TWR", 1);
 			map.get(12).set(17, st);
 			stairs.put(st.getID(), st);
+		}
+	}
+
+	private void generateItems()
+	{
+		Random gen = new Random();
+		if (gen.nextFloat() < 0.333)
+		{
+			generateItem(rlItem.Kind.GOLD);
+		}
+		if (gen.nextFloat() < 0.25)
+		{
+			generateItem(rlItem.Kind.GOLD);
+		}
+		if (gen.nextFloat() < 0.1)
+		{
+			generateItem(rlItem.Kind.GOLD);
+		}
+	}
+
+	private void generateItem(rlItem.Kind knd)
+	{
+		Random gen = new Random();
+		if (knd == rlItem.Kind.GOLD)
+		{
+			boolean done = false;
+			rlObj o = null;
+			while (!done)
+			{
+				o = graf.get(gen.nextInt(graf.size()));
+				if (o instanceof rlFloor)
+				{
+					if (((rlFloor)o).kind == rlFloor.Kind.ROOM)
+					{
+						if (o.items.isEmpty())
+						{
+							done = true;
+						}
+					}
+				}
+			}
+			int cnt = mLvl + gen.nextInt((10 * mLvl) - mLvl + 1);
+			rlItem gold = rlItem.makeGold(cnt, o.x, o.y);
+			o.items.add(gold);
 		}
 	}
 }

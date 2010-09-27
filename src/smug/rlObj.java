@@ -13,7 +13,7 @@ public class rlObj
 {
 	public enum Type
 	{
-		WALL, FLOOR, DOOR, CHAR
+		WALL, FLOOR, DOOR, CHAR, ITEM
 	}
 	//
 	public Type id;
@@ -41,13 +41,16 @@ public class rlObj
 		if (visible)
 		{
 			res = smb;
-			if (!items.isEmpty())
+			if (id != Type.CHAR)
 			{
-				res = items.get(items.size() - 1).getSymbol();
-			}
-			if (!chars.isEmpty())
-			{
-				res = chars.get(chars.size() - 1).getSymbol();
+				if (!items.isEmpty())
+				{
+					res = items.get(items.size() - 1).getSymbol();
+				}
+				if (!chars.isEmpty())
+				{
+					res = chars.get(chars.size() - 1).getSymbol();
+				}
 			}
 		}
 		return res;
