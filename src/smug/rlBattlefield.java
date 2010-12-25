@@ -12,6 +12,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.io.Serializable;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
+import java.util.HashMap;
 import javax.swing.JComponent;
 
 public class rlBattlefield
@@ -19,7 +22,8 @@ public class rlBattlefield
 		implements Serializable
 {
 	private int cols, rows;
-	private int cWidth, cHeight, cX, cY, sX, sY;
+	private int cWidth, cHeight, cY, sX, sY;
+	private HashMap cXmap;
 	private rlBuffer buf, osd;
 	public boolean rlBuffered;
 	private rlSymbol blank;
@@ -33,6 +37,7 @@ public class rlBattlefield
 		blank = new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK);
 		buf = new rlBuffer(cols, rows, blank);
 		osd = new rlBuffer(cols, rows, blank);
+		cXmap = new HashMap();
 		rlBuffered = true;
 		setBackground(rlColor.BLACK);
 		setForeground(rlColor.GRAY);
@@ -73,11 +78,26 @@ public class rlBattlefield
 
 	private void Resize()
 	{
+		String ts = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()<>[]{}!@#$%^&*:;\\/|?+-*_.,~\"";
 		FontMetrics fm = getFontMetrics(getFont());
-		cWidth = fm.getMaxAdvance();
+		int cMax = 0, cw = 0;
+		CharacterIterator it = new StringCharacterIterator(ts);
+		for (char c = it.first(); c != CharacterIterator.DONE; c = it.next())
+		{
+			cw = fm.charWidth(c);
+			if (cw > cMax)
+			{
+				cMax = cw;
+			}
+		}
+		cWidth = (cMax + (fm.stringWidth(ts) / ts.length())) / 2;
+		if ((fm.getMaxAdvance() - cWidth) == 1)
+		{
+			cWidth = cWidth + 1;
+		}
 		cHeight = fm.getHeight();
-		cX = 0;
 		cY = fm.getMaxAscent();
+		cXmap.clear();
 		Dimension size = new Dimension(cols * cWidth, rows * cHeight);
 		setPreferredSize(size);
 		setMinimumSize(size);
@@ -104,12 +124,13 @@ public class rlBattlefield
 		{
 			return;
 		}
-		int x, y;
+		int x, y, cX;
 		for (int c = 1; c <= cols; c++)
 		{
 			for (int r = 1; r <= rows; r++)
 			{
 				rlSymbol s = buf.get(c + sX, r + sY);
+				cX = getCX(s.code);
 				x = (c - 1) * cWidth;
 				y = (r - 1) * cHeight;
 				if (!s.bgColor.equals(getBackground()))
@@ -231,5 +252,17 @@ public class rlBattlefield
 		sX = x;
 		sY = y;
 		Refresh();
+	}
+
+	private int getCX(char code)
+	{
+		if (!cXmap.containsKey(code))
+		{
+			FontMetrics fm = getFontMetrics(getFont());
+			int cw = fm.charWidth(code);
+			Integer cX = new Integer((cWidth - cw) / 2);
+			cXmap.put(code, cX);
+		}
+		return (Integer)cXmap.get(code);
 	}
 }
