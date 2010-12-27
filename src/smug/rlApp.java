@@ -9,6 +9,7 @@ package smug;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
@@ -52,13 +53,22 @@ public class rlApp
 		win = new JFrame("smug");
 		win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		win.getContentPane().setLayout(null);
-		win.setIconImage(new ImageIcon(rlApp.class.getResource("smug.png")).getImage());
+		win.setIconImage(new ImageIcon(rlApp.class.getResource("res/smug.png")).getImage());
+		InputStream is = rlApp.class.getResourceAsStream("res/DejaVuSansMono.ttf");
+		try
+		{
+			Font fb = Font.createFont(Font.TRUETYPE_FONT, is);
+			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(fb);
+		}
+		catch (Exception ex)
+		{
+		}
 		bf = new rlBattlefield();
 		bf.setCols(80);
 		bf.setRows(25);
 		rlBuffer buf = new rlBuffer(320, 100, new rlSymbol(' ', rlColor.GRAY, rlColor.BLACK));
 		bf.setBuffer(buf);
-		bf.setFont(new Font("Monospaced", 1, 14));
+		bf.setFont(new Font("DejaVu Sans Mono", 1, 14));
 		win.getContentPane().add(bf);
 		win.setPreferredSize(bf.getPreferredSize());
 		win.setResizable(false);
