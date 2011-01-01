@@ -1,7 +1,7 @@
 /*
  * smug
  * rlFont.java
- * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * Copyright (C) 2010-2011 vktgz <vktgz@jabster.pl>
  * License: GPLv3
  */
 

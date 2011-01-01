@@ -1,7 +1,7 @@
 /*
  * smug
  * rlApp.java
- * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * Copyright (C) 2010-2011 vktgz <vktgz@jabster.pl>
  * License: GPLv3
  */
 
@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -41,12 +42,13 @@ public class rlApp
 	private BasicService bs;
 	private PersistenceService ps;
 	private URL codebase;
-	private HashMap maps;
+	private HashMap maps, keyset;
 
 	public rlApp()
 	{
 		mbuf = new LinkedList<String>();
 		maps = new HashMap();
+		keyset = new HashMap();
 		sx = 0;
 		sy = 0;
 		nmsg = 0;
@@ -149,6 +151,7 @@ public class rlApp
 		catch (InterruptedException ex)
 		{
 		}
+		makeKeyset();
 		map = new rlMap(32, 16, "CTY", 0);
 		map.generateSpecialMap("CTY");
 		pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', rlColor.DGRAY, rlColor.BLACK));
@@ -179,310 +182,27 @@ public class rlApp
 		bf.Refresh();
 	}
 
-	private boolean getInput()
+	private int wait4key(ArrayList<rlKey> keys)
 	{
-		boolean quit = false;
-		boolean key = false;
+		int res = rlKey.RL_NONE;
 		boolean shift, ctrl, alt;
-		while (!key)
+		boolean done = false;
+		while (!done)
 		{
 			shift = kbd.poll(KeyEvent.VK_SHIFT);
 			ctrl = kbd.poll(KeyEvent.VK_CONTROL);
 			alt = kbd.poll(KeyEvent.VK_ALT);
-			if (kbd.poll(KeyEvent.VK_D))
+			for (int i = 0; i < keys.size(); i++)
 			{
-				key = true;
-				kbd.rebound(KeyEvent.VK_D);
+				rlKey key = keys.get(i);
+				if (key.poll(kbd, shift, ctrl, alt))
+				{
+					done = true;
+					res = key.action;
+					break;
+				}
 			}
-			if (kbd.poll(KeyEvent.VK_Q))
-			{
-				key = true;
-				if (ctrl)
-				{
-					quit = true;
-				}
-				kbd.rebound(KeyEvent.VK_Q);
-			}
-			if (kbd.poll(KeyEvent.VK_UP))
-			{
-				key = true;
-				if (shift)
-				{
-					sy--;
-				}
-				else
-				{
-					movePC(pc.x, pc.y - 1);
-				}
-				kbd.rebound(KeyEvent.VK_UP);
-			}
-			if (kbd.poll(KeyEvent.VK_DOWN))
-			{
-				key = true;
-				if (shift)
-				{
-					sy++;
-				}
-				else
-				{
-					movePC(pc.x, pc.y + 1);
-				}
-				kbd.rebound(KeyEvent.VK_DOWN);
-			}
-			if (kbd.poll(KeyEvent.VK_RIGHT))
-			{
-				key = true;
-				if (shift)
-				{
-					sx++;
-					if (ctrl)
-					{
-						sy++;
-					}
-					if (alt)
-					{
-						sy--;
-					}
-				}
-				else
-				{
-					if (ctrl)
-					{
-						movePC(pc.x + 1, pc.y + 1);
-					}
-					else if (alt)
-					{
-						movePC(pc.x + 1, pc.y - 1);
-					}
-					else
-					{
-						movePC(pc.x + 1, pc.y);
-					}
-				}
-				kbd.rebound(KeyEvent.VK_RIGHT);
-			}
-			if (kbd.poll(KeyEvent.VK_LEFT))
-			{
-				key = true;
-				if (shift)
-				{
-					sx--;
-					if (ctrl)
-					{
-						sy++;
-					}
-					if (alt)
-					{
-						sy--;
-					}
-				}
-				else
-				{
-					if (ctrl)
-					{
-						movePC(pc.x - 1, pc.y + 1);
-					}
-					else if (alt)
-					{
-						movePC(pc.x - 1, pc.y - 1);
-					}
-					else
-					{
-						movePC(pc.x - 1, pc.y);
-					}
-				}
-				kbd.rebound(KeyEvent.VK_LEFT);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD8))
-			{
-				key = true;
-				if (shift)
-				{
-					sy--;
-				}
-				else
-				{
-					movePC(pc.x, pc.y - 1);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD8);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD2))
-			{
-				key = true;
-				if (shift)
-				{
-					sy++;
-				}
-				else
-				{
-					movePC(pc.x, pc.y + 1);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD2);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD6))
-			{
-				key = true;
-				if (shift)
-				{
-					sx++;
-				}
-				else
-				{
-					movePC(pc.x + 1, pc.y);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD6);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD9))
-			{
-				key = true;
-				if (shift)
-				{
-					sx++;
-					sy--;
-				}
-				else
-				{
-					movePC(pc.x + 1, pc.y - 1);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD9);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD3))
-			{
-				key = true;
-				if (shift)
-				{
-					sx++;
-					sy++;
-				}
-				else
-				{
-					movePC(pc.x + 1, pc.y + 1);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD3);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD4))
-			{
-				key = true;
-				if (shift)
-				{
-					sx--;
-				}
-				else
-				{
-					movePC(pc.x - 1, pc.y);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD4);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD7))
-			{
-				key = true;
-				if (shift)
-				{
-					sx--;
-					sy--;
-				}
-				else
-				{
-					movePC(pc.x - 1, pc.y - 1);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD7);
-			}
-			if (kbd.poll(KeyEvent.VK_NUMPAD1))
-			{
-				key = true;
-				if (shift)
-				{
-					sx--;
-					sy++;
-				}
-				else
-				{
-					movePC(pc.x - 1, pc.y + 1);
-				}
-				kbd.rebound(KeyEvent.VK_NUMPAD1);
-			}
-			if (kbd.poll(KeyEvent.VK_O))
-			{
-				key = true;
-				openDoor(true);
-				kbd.rebound(KeyEvent.VK_O);
-			}
-			if (kbd.poll(KeyEvent.VK_C))
-			{
-				key = true;
-				openDoor(false);
-				kbd.rebound(KeyEvent.VK_C);
-			}
-			if (kbd.poll(KeyEvent.VK_PERIOD))
-			{
-				key = true;
-				if (shift)
-				{
-					boolean mvd = false;
-					rlObj o = map.map.get(pc.y).get(pc.x);
-					if (o instanceof rlDoor)
-					{
-						rlDoor p = (rlDoor)o;
-						if (p.dir == rlDoor.Dir.D)
-						{
-							moveMap(p);
-							mvd = true;
-						}
-					}
-					if (!mvd)
-					{
-						addMsg("There are no stairs to descend.");
-					}
-				}
-				kbd.rebound(KeyEvent.VK_PERIOD);
-			}
-			if (kbd.poll(KeyEvent.VK_COMMA))
-			{
-				key = true;
-				if (shift)
-				{
-					boolean mvd = false;
-					rlObj o = map.map.get(pc.y).get(pc.x);
-					if (o instanceof rlDoor)
-					{
-						rlDoor p = (rlDoor)o;
-						if (p.dir == rlDoor.Dir.U)
-						{
-							moveMap(p);
-							mvd = true;
-						}
-					}
-					if (!mvd)
-					{
-						addMsg("There are no stairs to ascend.");
-					}
-				}
-				else
-				{
-					rlObj o = map.map.get(pc.y).get(pc.x);
-					if (o.items.isEmpty())
-					{
-						addMsg("There is nothing to pickup.");
-
-					}
-					else
-					{
-						pickup(o);
-
-					}
-				}
-				kbd.rebound(KeyEvent.VK_COMMA);
-			}
-			if (kbd.poll(KeyEvent.VK_F))
-			{
-				key = true;
-				if (ctrl)
-				{
-					selectFont();
-				}
-				kbd.rebound(KeyEvent.VK_F);
-			}
-			if (!key)
+			if (!done)
 			{
 				try
 				{
@@ -492,6 +212,148 @@ public class rlApp
 				{
 				}
 			}
+		}
+		return res;
+	}
+
+	private boolean getInput()
+	{
+		boolean quit = false;
+		int key = wait4key((ArrayList<rlKey>)keyset.get("main"));
+		if (key == rlKey.RL_DBG)
+		{
+		}
+		if (key == rlKey.RL_QUIT)
+		{
+			quit = true;
+		}
+		if (key == rlKey.RL_MN)
+		{
+			movePC(pc.x, pc.y - 1);
+		}
+		if (key == rlKey.RL_MS)
+		{
+			movePC(pc.x, pc.y + 1);
+		}
+		if (key == rlKey.RL_MW)
+		{
+			movePC(pc.x - 1, pc.y);
+		}
+		if (key == rlKey.RL_ME)
+		{
+			movePC(pc.x + 1, pc.y);
+		}
+		if (key == rlKey.RL_MNW)
+		{
+			movePC(pc.x - 1, pc.y - 1);
+		}
+		if (key == rlKey.RL_MNE)
+		{
+			movePC(pc.x + 1, pc.y - 1);
+		}
+		if (key == rlKey.RL_MSW)
+		{
+			movePC(pc.x - 1, pc.y + 1);
+		}
+		if (key == rlKey.RL_MSE)
+		{
+			movePC(pc.x + 1, pc.y + 1);
+		}
+		if (key == rlKey.RL_MU)
+		{
+			boolean mvd = false;
+			rlObj o = map.map.get(pc.y).get(pc.x);
+			if (o instanceof rlDoor)
+			{
+				rlDoor p = (rlDoor)o;
+				if (p.dir == rlDoor.Dir.U)
+				{
+					moveMap(p);
+					mvd = true;
+				}
+			}
+			if (!mvd)
+			{
+				addMsg("There are no stairs to ascend.");
+			}
+		}
+		if (key == rlKey.RL_MD)
+		{
+			boolean mvd = false;
+			rlObj o = map.map.get(pc.y).get(pc.x);
+			if (o instanceof rlDoor)
+			{
+				rlDoor p = (rlDoor)o;
+				if (p.dir == rlDoor.Dir.D)
+				{
+					moveMap(p);
+					mvd = true;
+				}
+			}
+			if (!mvd)
+			{
+				addMsg("There are no stairs to descend.");
+			}
+		}
+		if (key == rlKey.RL_SN)
+		{
+			sy--;
+		}
+		if (key == rlKey.RL_SS)
+		{
+			sy++;
+		}
+		if (key == rlKey.RL_SW)
+		{
+			sx--;
+		}
+		if (key == rlKey.RL_SE)
+		{
+			sx++;
+		}
+		if (key == rlKey.RL_SNW)
+		{
+			sx--;
+			sy--;
+		}
+		if (key == rlKey.RL_SNE)
+		{
+			sx++;
+			sy--;
+		}
+		if (key == rlKey.RL_SSW)
+		{
+			sx--;
+			sy++;
+		}
+		if (key == rlKey.RL_SSE)
+		{
+			sx++;
+			sy++;
+		}
+		if (key == rlKey.RL_OPEN)
+		{
+			openDoor(true);
+		}
+		if (key == rlKey.RL_CLOSE)
+		{
+			openDoor(false);
+		}
+		if (key == rlKey.RL_PICK)
+		{
+			rlObj o = map.map.get(pc.y).get(pc.x);
+			if (o.items.isEmpty())
+			{
+				addMsg("There is nothing to pick up.");
+			}
+			else
+			{
+				pickup(o);
+			}
+		}
+		if (key == rlKey.RL_FONT)
+		{
+			selectFont();
 		}
 		return quit;
 	}
@@ -745,8 +607,59 @@ public class rlApp
 		while (!o.items.isEmpty())
 		{
 			rlItem i = (rlItem)o.items.remove(0);
-			addMsg("You pickup ".concat(i.getName()).concat("."));
+			addMsg("You pick up ".concat(i.getName()).concat("."));
 			pc.items.add(i);
 		}
+	}
+
+	private void makeKeyset()
+	{
+		ArrayList<rlKey> keys = new ArrayList<rlKey>();
+		keys.add(new rlKey(rlKey.RL_DBG, KeyEvent.VK_D, false, false, true));
+		keys.add(new rlKey(rlKey.RL_QUIT, KeyEvent.VK_Q, false, true, false));
+		keys.add(new rlKey(rlKey.RL_FONT, KeyEvent.VK_F, false, true, false));
+		keys.add(new rlKey(rlKey.RL_MN, KeyEvent.VK_UP, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MS, KeyEvent.VK_DOWN, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MW, KeyEvent.VK_LEFT, false, false, false));
+		keys.add(new rlKey(rlKey.RL_ME, KeyEvent.VK_RIGHT, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MN, KeyEvent.VK_NUMPAD8, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MS, KeyEvent.VK_NUMPAD2, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MW, KeyEvent.VK_NUMPAD4, false, false, false));
+		keys.add(new rlKey(rlKey.RL_ME, KeyEvent.VK_NUMPAD6, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MNW, KeyEvent.VK_NUMPAD7, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MNE, KeyEvent.VK_NUMPAD9, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MSW, KeyEvent.VK_NUMPAD1, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MSE, KeyEvent.VK_NUMPAD3, false, false, false));
+		keys.add(new rlKey(rlKey.RL_MNW, KeyEvent.VK_LEFT, false, false, true));
+		keys.add(new rlKey(rlKey.RL_MNE, KeyEvent.VK_RIGHT, false, false, true));
+		keys.add(new rlKey(rlKey.RL_MSW, KeyEvent.VK_LEFT, false, true, false));
+		keys.add(new rlKey(rlKey.RL_MSE, KeyEvent.VK_RIGHT, false, true, false));
+		keys.add(new rlKey(rlKey.RL_MU, KeyEvent.VK_COMMA, true, false, false));
+		keys.add(new rlKey(rlKey.RL_MD, KeyEvent.VK_PERIOD, true, false, false));
+		keys.add(new rlKey(rlKey.RL_OPEN, KeyEvent.VK_O, false, false, false));
+		keys.add(new rlKey(rlKey.RL_CLOSE, KeyEvent.VK_C, false, false, false));
+		keys.add(new rlKey(rlKey.RL_PICK, KeyEvent.VK_COMMA, false, false, false));
+		keys.add(new rlKey(rlKey.RL_DROP, KeyEvent.VK_D, false, false, false));
+		keys.add(new rlKey(rlKey.RL_SN, KeyEvent.VK_UP, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SS, KeyEvent.VK_DOWN, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SW, KeyEvent.VK_LEFT, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SE, KeyEvent.VK_RIGHT, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SN, KeyEvent.VK_NUMPAD8, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SS, KeyEvent.VK_NUMPAD2, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SW, KeyEvent.VK_NUMPAD4, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SE, KeyEvent.VK_NUMPAD6, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SNW, KeyEvent.VK_NUMPAD7, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SNE, KeyEvent.VK_NUMPAD9, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SSW, KeyEvent.VK_NUMPAD1, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SSE, KeyEvent.VK_NUMPAD3, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SN, KeyEvent.VK_KP_UP, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SS, KeyEvent.VK_KP_DOWN, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SW, KeyEvent.VK_KP_LEFT, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SE, KeyEvent.VK_KP_RIGHT, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SNW, KeyEvent.VK_HOME, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SNE, KeyEvent.VK_PAGE_UP, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SSW, KeyEvent.VK_END, true, false, false));
+		keys.add(new rlKey(rlKey.RL_SSE, KeyEvent.VK_PAGE_DOWN, true, false, false));
+		keyset.put("main", keys);
 	}
 }

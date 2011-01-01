@@ -1,7 +1,7 @@
 /*
  * smug
  * rlKeyboard.java
- * Copyright (C) vktgz 2010 <vktgz@jabster.pl>
+ * Copyright (C) 2010-2011 vktgz <vktgz@jabster.pl>
  * License: GPLv3
  *
  * based on: http://www.gamedev.net/reference/programming/features/javainput/page2.asp
