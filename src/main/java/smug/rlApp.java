@@ -1,9 +1,3 @@
-/*
- * smug
- * rlApp.java
- * Copyright (C) 2010-2011 vktgz <vktgz@jabster.pl>
- * License: GPLv3
- */
 package smug;
 
 import java.awt.Dimension;
@@ -24,7 +18,7 @@ import javax.swing.WindowConstants;
 public class rlApp
 {
   final private int MSGS = 1000;
-  //
+
   private JFrame win;
   private rlBattlefield bf;
   private int sx, sy, nmsg;

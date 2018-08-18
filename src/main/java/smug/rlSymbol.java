@@ -1,30 +1,23 @@
-/*
- * smug
- * rlSymbol.java
- * Copyright (C) 2010-2011 vktgz <vktgz@jabster.pl>
- * License: GPLv3
- */
-
 package smug;
 
 import java.awt.Color;
 
 public class rlSymbol
 {
-	final public static rlSymbol FOG = new rlSymbol(' ', rlColor.BLACK, rlColor.BLACK);
-	//
-	public char code;
-	public Color fgColor, bgColor;
+  final public static rlSymbol FOG = new rlSymbol(' ', rlColor.BLACK, rlColor.BLACK);
 
-	public rlSymbol(char val, Color fg, Color bg)
-	{
-		code = val;
-		fgColor = fg;
-		bgColor = bg;
-	}
+  public char code;
+  public Color fgColor, bgColor;
 
-	public String str()
-	{
-		return String.valueOf(code);
-	}
+  public rlSymbol(char val, Color fg, Color bg)
+  {
+    code = val;
+    fgColor = fg;
+    bgColor = bg;
+  }
+
+  public String str()
+  {
+    return String.valueOf(code);
+  }
 }
