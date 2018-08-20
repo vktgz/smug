@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.prefs.Preferences;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -74,6 +75,7 @@ public class rlApp
       @Override
       protected Void doInBackground()
       {
+        loadCfg();
         initGame();
         boolean quit = false, draw = true;
         rlObj o;
@@ -115,6 +117,7 @@ public class rlApp
       protected void done()
       {
         win.setVisible(false);
+        saveCfg();
         System.out.println("Terminated.");
         System.exit(0);
       }
@@ -596,5 +599,18 @@ public class rlApp
     keys.add(new rlKey(rlKey.RL_SSW, KeyEvent.VK_END, true, false, false));
     keys.add(new rlKey(rlKey.RL_SSE, KeyEvent.VK_PAGE_DOWN, true, false, false));
     keyset.put("main", keys);
+  }
+
+  private void loadCfg()
+  {
+    Preferences cfg = Preferences.userRoot().node("smug");
+    bf.setFont(new Font(cfg.get("font_name", "DejaVu Sans Mono"), 1, cfg.getInt("font_size", 14)));
+  }
+
+  private void saveCfg()
+  {
+    Preferences cfg = Preferences.userRoot().node("smug");
+    cfg.put("font_name", bf.getFont().getFamily());
+    cfg.putInt("font_size", bf.getFont().getSize());
   }
 }
