@@ -6,7 +6,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,7 +27,6 @@ public class rlApp
   private rlChar pc;
   private long time;
   private LinkedList<String> mbuf;
-  private URL codebase;
   private HashMap maps, keyset;
 
   public rlApp()
