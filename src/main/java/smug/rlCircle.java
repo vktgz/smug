@@ -19,11 +19,14 @@ public class rlCircle
     float rd = (float)(Math.PI / 180);
     for (int l = 0; l < 360; l++)
     {
-      al = l * rd;
-      x = Math.round(r * (float)Math.cos(al));
-      y = Math.round(r * (float)Math.sin(al));
-      e = new rlPoint(c.col + x, c.row + y);
-      add(new rlLine(c, e));
+      for (int ar = 1; ar <= r; ar++)
+      {
+        al = l * rd;
+        x = Math.round(ar * (float)Math.cos(al));
+        y = Math.round(ar * (float)Math.sin(al));
+        e = new rlPoint(c.col + x, c.row + y);
+        add(new rlLine(c, e));
+      }
     }
   }
 

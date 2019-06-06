@@ -4,22 +4,15 @@ import java.util.Arrays;
 
 public class rlUtl
 {
-  public static String fill(String str, char c, int len, boolean beg)
+  public static String fill(String beg, String end, char c, int len)
   {
     String fstr = "";
-    if (str.length() < len)
+    if (beg.length() + end.length() < len)
     {
-      char flc[] = new char[len - str.length()];
+      char flc[] = new char[len - beg.length() - end.length()];
       Arrays.fill(flc, c);
       fstr = new String(flc);
     }
-    if (beg)
-    {
-      return fstr.concat(str);
-    }
-    else
-    {
-      return str.concat(fstr);
-    }
+    return beg.concat(fstr).concat(end);
   }
 }

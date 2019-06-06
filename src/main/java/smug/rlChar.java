@@ -1,7 +1,9 @@
 package smug;
 
+import java.awt.Color;
+
 public class rlChar
-    extends rlObj
+  extends rlObj
 {
   public enum Kind
   {
@@ -9,6 +11,8 @@ public class rlChar
   }
 
   public Kind kind;
+  public int hp, mp;
+  public int strength, inteligence, dexterity, perception, luck;
 
   public rlChar(Kind nkind, rlSymbol nsymb)
   {
@@ -25,5 +29,31 @@ public class rlChar
 
   void action()
   {
+  }
+
+  public int fov()
+  {
+    if (perception < 10)
+    {
+      return 2;
+    }
+    if (perception > 19)
+    {
+      return 4;
+    }
+    return 3;
+  }
+
+  public static rlChar makePC(Color color)
+  {
+    rlChar pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', color, rlColor.BLACK));
+    pc.hp = 10;
+    pc.mp = 1;
+    pc.strength = 10;
+    pc.inteligence = 10;
+    pc.dexterity = 10;
+    pc.perception = 10;
+    pc.luck = 10;
+    return pc;
   }
 }

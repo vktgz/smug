@@ -139,7 +139,7 @@ public class rlApp
     makeKeyset();
     map = new rlMap(32, 16, "CTY", 0);
     map.generateSpecialMap("CTY");
-    pc = new rlChar(rlChar.Kind.PC, new rlSymbol('@', rlColor.DGRAY, rlColor.BLACK));
+    pc = rlChar.makePC(rlColor.DGRAY);
     map.map.get(2).get(2).chars.add(pc);
     map.timer.add(pc);
     pc.x = 2;
@@ -157,7 +157,7 @@ public class rlApp
 
   private void Redraw()
   {
-    map.setVisible(pc.x, pc.y, 3);
+    map.setVisible(pc.x, pc.y, pc.fov());
     bf.getBuffer().clear();
     map.fillBuf(bf.getBuffer());
     bf.scroll(pc.x - 40 + sx, pc.y - 12 + sy);
@@ -426,8 +426,8 @@ public class rlApp
       }
       nmsg = 0;
     }
-    line0 = rlUtl.fill(line0, ' ', 80, false);
-    line1 = rlUtl.fill(line1, ' ', 80, false);
+    line0 = rlUtl.fill(line0, "", ' ', 80);
+    line1 = rlUtl.fill(line1, "", ' ', 80);
     bf.drawStringOSD(new rlPoint(1, 1), line0);
     bf.drawStringOSD(new rlPoint(1, 2), line1);
   }
@@ -492,18 +492,23 @@ public class rlApp
 
   private void drawStatus()
   {
-    String line0 = "", line1 = "";
-    line0 = "Player Str: 10";
+    String line0 = "", line0end = "", line1 = "", line1end = "";
+    line0 = "Player Str: " + pc.strength
+      + " Int: " + pc.inteligence
+      + " Dex: " + pc.dexterity
+      + " Per: " + pc.perception
+      + " Lck: " + pc.luck;
+    line1 = "HP: " + pc.hp + " MP: " + pc.mp;
     if (map.mLvl > 0)
     {
-      line1 = "Level: " + map.getID();
+      line1end = "Level: " + map.getID();
     }
     else
     {
-      line1 = "Level: " + map.mID;
+      line1end = "Level: " + map.mID;
     }
-    line0 = rlUtl.fill(line0, ' ', 80, false);
-    line1 = rlUtl.fill(line1, ' ', 80, true);
+    line0 = rlUtl.fill(line0, line0end, ' ', 80);
+    line1 = rlUtl.fill(line1, line1end, ' ', 80);
     bf.drawStringOSD(new rlPoint(1, 24), line0);
     bf.drawStringOSD(new rlPoint(1, 25), line1);
   }
