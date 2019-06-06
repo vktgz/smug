@@ -38,11 +38,19 @@ public class rlObj
       {
         if (!items.isEmpty())
         {
-          res = items.get(items.size() - 1).getSymbol();
+          rlObj itm = items.get(items.size() - 1);
+          if (itm.getVisible())
+          {
+            res = itm.getSymbol();
+          }
         }
         if (!chars.isEmpty())
         {
-          res = chars.get(chars.size() - 1).getSymbol();
+          rlChar chr = chars.get(chars.size() - 1);
+          if (chr.getVisible())
+          {
+            res = chr.getSymbol();
+          }
         }
       }
     }
